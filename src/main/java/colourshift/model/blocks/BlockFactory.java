@@ -1,40 +1,67 @@
 package colourshift.model.blocks;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import colourshift.model.Direction;
+import colourshift.model.angle.*;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
 import colourshift.model.Colour;
 
+
 public class BlockFactory {
 
 	public enum BlockType {
-		EMPTY, TARGET, STRAIGHT, TURN, THREE, DOUBLE_TURN, HALF_FOUR, FULL_FOUR, SOURCE_ONE, SOURCE_STRAIGHT, SOURCE_TURN, SOURCE_THREE, SOURCE_FOUR;
-		
-		private static Map<Class<? extends Block>, BlockType> blockTypeToEnum;
-		
-		static {
-			blockTypeToEnum.put(Empty.class, EMPTY);
-			blockTypeToEnum.put(Target.class, TARGET);
-			blockTypeToEnum.put(Straight.class, STRAIGHT);
-			blockTypeToEnum.put(Turn.class, TURN);
-			blockTypeToEnum.put(Three.class, THREE);
-			blockTypeToEnum.put(DoubleTurn.class, DOUBLE_TURN);
-			blockTypeToEnum.put(HalfFour.class, HALF_FOUR);
-			blockTypeToEnum.put(FullFour.class, FULL_FOUR);
-			blockTypeToEnum.put(SourceOne.class, SOURCE_ONE);
-			blockTypeToEnum.put(SourceStraight.class, SOURCE_STRAIGHT);
-			blockTypeToEnum.put(SourceTurn.class, SOURCE_TURN);
-			blockTypeToEnum.put(SourceThree.class, SOURCE_THREE);
-			blockTypeToEnum.put(SourceFour.class, SOURCE_FOUR);
+		EMPTY(Empty.class, 0, Single.values()),
+		TARGET(Target.class, 2, Direction.values()),
+		STRAIGHT(Straight.class, 1, Orientation.values()),
+		TURN(Turn.class, 1, TurnAngle.values()),
+		THREE(Three.class, 1, ThreeAngle.values()),
+		DOUBLE_TURN(DoubleTurn.class, 2, Single.values()),
+		HALF_FOUR(HalfFour.class, 2, Single.values()),
+		FULL_FOUR(FullFour.class, 1, Single.values()),
+		SOURCE_ONE(SourceOne.class, 1, Direction.values()),
+        SOURCE_STRAIGHT(SourceStraight.class, 1, Orientation.values()),
+		SOURCE_TURN(SourceTurn.class, 1, TurnAngle.values()),
+		SOURCE_THREE(SourceThree.class, 1, ThreeAngle.values()),
+		SOURCE_FOUR(SourceFour.class, 1, Single.values());
+
+		private static class Holder {
+			public static Map<Class<? extends Block>, BlockType> blockTypeToEnum = Maps.newHashMap();
 		}
-		
-		public static BlockType fromJavaClass(Class<? extends Block> type) {
-			return blockTypeToEnum.get(type);
+
+		private int coloursCount;
+        private Class<? extends Block> javaClass;
+        private List<Angle> initialAngles;
+
+		BlockType(Class<? extends Block> javaClass, int coloursCount, Angle[] initialAngles) {
+            this.coloursCount = coloursCount;
+            this.javaClass = javaClass;
+            this.initialAngles = Arrays.asList(initialAngles);
+            Holder.blockTypeToEnum.put(javaClass, this);
+        }
+
+		public static BlockType fromJavaClass(Class<? extends Block> javaClass) {
+			return Holder.blockTypeToEnum.get(javaClass);
 		}
+
+        public Class<? extends Block> getJavaClass() {
+            return javaClass;
+        }
+
+		public int getColoursCount() {
+			return coloursCount;
+		}
+
+        public List<Angle> getInitialAngles() {
+            return initialAngles;
+        }
 	}
 	
 	private ImmutableSet<BlockType> blockTypesThatRequireColour = Sets.immutableEnumSet(BlockType.TARGET, BlockType.SOURCE_ONE,

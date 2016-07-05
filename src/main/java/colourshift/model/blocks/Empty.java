@@ -13,8 +13,7 @@ import colourshift.model.power.EmptyPower;
 public class Empty extends Block {
 
 	private static Empty INSTANCE;
-	private static List<Angle> initialAngles = Arrays.asList(Single.values());
-	
+
 	public static Empty getInstance() {
 		if (INSTANCE == null) {
 			INSTANCE = new Empty();
@@ -25,11 +24,6 @@ public class Empty extends Block {
 	@Override
 	public void updateReceived(Direction fromDirection, Colour colour) {
 		
-	}
-
-	@Override
-	protected List<Angle> getInitialAngles() {
-		return initialAngles;
 	}
 
 	@Override

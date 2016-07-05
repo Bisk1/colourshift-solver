@@ -25,11 +25,6 @@ public class SourceOne extends Source {
 	}
 
 	@Override
-	protected List<Angle> getInitialAngles() {
-		return Arrays.asList(Direction.values());
-	}
-
-	@Override
 	protected Map<Angle, DirectionSet> getDirectionsSets() {
 		return directionsSets;
 	}

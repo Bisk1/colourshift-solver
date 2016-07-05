@@ -24,8 +24,6 @@ public class Straight extends TransitiveBlock {
 		this.power = new SimplePower();
 	}
 
-	private static List<Angle> initialAngles = Arrays.asList(Orientation.values());
-
 	@Override
 	protected Map<Angle, DirectionsDivision> getDirectonsDivisions() {
 		return ImmutableMap.of(
@@ -36,11 +34,6 @@ public class Straight extends TransitiveBlock {
 	@Override
 	void updatePower(Direction fromDirection, Colour colour) {
 		power.setColour(colour);
-	}
-
-	@Override
-	protected List<Angle> getInitialAngles() {
-		return initialAngles;
 	}
 
 	@Override

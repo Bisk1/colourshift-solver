@@ -28,8 +28,6 @@ public class HalfFour extends TransitiveBlock {
 		this.power = new HalfFourPower();
 	}
 
-	private static List<Angle> initialAngles = Arrays.asList(HalfFourAngle.values());
-
 	@Override
 	protected Map<Angle, DirectionsDivision> getDirectonsDivisions() {
 		return ImmutableMap.of(HalfFourAngle.LEFT_DOWN_AND_UP_RIGHT, new DirectionsDivision(
@@ -57,11 +55,6 @@ public class HalfFour extends TransitiveBlock {
 				power.setRight(colour);
 			}
 		}
-	}
-
-	@Override
-	protected List<Angle> getInitialAngles() {
-		return initialAngles;
 	}
 
 	@Override

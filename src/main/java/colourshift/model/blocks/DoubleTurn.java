@@ -24,8 +24,6 @@ public class DoubleTurn extends TransitiveBlock {
 		this.power = new DoubleTurnPower();
 	}
 
-	private static List<Angle> initialAngles = Arrays.asList(Single.values());
-
 	@Override
 	protected Map<Angle, DirectionsDivision> getDirectonsDivisions() {
 		return ImmutableMap.of(Single.SINGLE, new DirectionsDivision(
@@ -41,11 +39,6 @@ public class DoubleTurn extends TransitiveBlock {
 		default:
 			power.setVertical(colour);
 		}
-	}
-
-	@Override
-	protected List<Angle> getInitialAngles() {
-		return initialAngles;
 	}
 
 	@Override

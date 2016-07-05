@@ -26,11 +26,6 @@ public class SourceTurn extends Source {
 	}
 
 	@Override
-	protected List<Angle> getInitialAngles() {
-		return Arrays.asList(TurnAngle.values());
-	}
-
-	@Override
 	protected Map<Angle, DirectionSet> getDirectionsSets() {
 		return directionsSets;
 	}

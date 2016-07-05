@@ -12,9 +12,7 @@ import colourshift.model.power.TargetPower;
 public class Target extends Block {
 
 	private TargetPower power;
-	
-	private static List<Angle> initialAngles = Arrays.asList(Direction.values());
-	
+
 	public Target(Colour requiredColour) {
 		super();
 		this.power = new TargetPower(requiredColour);
@@ -29,11 +27,6 @@ public class Target extends Block {
 	
 	public boolean isActive() {
 		return power.getCurrent() == power.getRequired();
-	}
-
-	@Override
-	protected List<Angle> getInitialAngles() {
-		return initialAngles;
 	}
 
 	@Override

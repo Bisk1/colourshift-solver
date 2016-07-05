@@ -24,8 +24,6 @@ public class FullFour extends TransitiveBlock {
 		this.power = new SimplePower();
 	}
 
-	private static List<Angle> initialAngles = Arrays.asList(Single.values());
-
 	@Override
 	protected Map<Angle, DirectionsDivision> getDirectonsDivisions() {
 		return ImmutableMap.of(Single.SINGLE, new DirectionsDivision(
@@ -35,11 +33,6 @@ public class FullFour extends TransitiveBlock {
 	@Override
 	void updatePower(Direction fromDirection, Colour colour) {
 		power.setColour(colour);
-	}
-
-	@Override
-	protected List<Angle> getInitialAngles() {
-		return initialAngles;
 	}
 
 	@Override

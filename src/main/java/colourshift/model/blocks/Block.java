@@ -33,7 +33,7 @@ public abstract class Block {
 	private Set<Angle> feasibleAngles;
 
 	public Block() {
-		this.initialAngles = getInitialAngles();
+		this.initialAngles = BlockFactory.BlockType.fromJavaClass(this.getClass()).getInitialAngles();
 		this.feasibleAngles = Sets.newHashSet(initialAngles);
 		this.angle = initialAngles.get(0);
 	}
@@ -43,9 +43,7 @@ public abstract class Block {
 	}
 
 	public abstract void updateReceived(Direction fromDirection, Colour colour);
-	
-	protected abstract List<? extends Angle> getInitialAngles();
-	
+
 	public boolean isFixed() {
 		return feasibleAngles.size() == 1;
 	}
@@ -60,6 +58,9 @@ public abstract class Block {
 		return angle;
 	}
 	
+	public Set<Angle> getFeasibleAngles() {
+		return feasibleAngles;
+	}
 
 	public abstract Power getPower();
 }
