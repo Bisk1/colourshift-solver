@@ -1,5 +1,6 @@
 package colourshift.gui;
 
+import colourshift.model.blocks.Block;
 import colourshift.model.blocks.Board;
 import colourshift.model.blocks.BoardFactory;
 import colourshift.model.blocks.BoardFactory.Wrap;
@@ -7,6 +8,7 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
@@ -14,12 +16,11 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
-import javafx.scene.text.Font;
-import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,12 +35,14 @@ public class Gui {
     @Autowired
     private ImageProvider imageProvider;
 
-	public void init(Stage primaryStage) throws Exception {
+    private Text logBox;
+
+    public void init(Stage primaryStage) throws Exception {
         primaryStage.setTitle("Colourshift solver");
         setupMenuScene(primaryStage);
 	}
 
-    public void setupMenuScene(Stage primaryStage) {
+    private void setupMenuScene(Stage primaryStage) {
 
         GridPane grid = new GridPane();
 
@@ -48,7 +51,7 @@ public class Gui {
         grid.add(newBtn, 0, 0);
 
         Label sizeLabel = new Label("Size:");
-        TextField sizeInput = new TextField();
+        TextField sizeInput = new TextField("5");
         HBox sizeBox = new HBox(sizeLabel, sizeInput);
         grid.add(sizeBox, 0, 1);
 
@@ -59,87 +62,112 @@ public class Gui {
 
         VBox vBox = new VBox(newBtn, sizeBox, wrapBox);
 
-        newBtn.setOnAction(new EventHandler<ActionEvent>() {
-            @Override public void handle(ActionEvent e) {
+        newBtn.setOnAction((ActionEvent e) -> {
                 int boardSizeInt = Integer.parseInt(sizeInput.getText());
-                System.out.println("boardSizeInt: " + boardSizeInt);
                 Wrap wrap =  wrapInput.isSelected() ? Wrap.ENABLED : Wrap.DISABLED;
                 Board board = boardFactory.createEmpty(boardSizeInt, boardSizeInt, wrap);
                 setupBoardScene(primaryStage, board);
             }
-        });
+        );
 
         primaryStage.setScene(new Scene(vBox));
         primaryStage.show();
 
     }
 
-    public void setupBoardScene(Stage primaryStage, Board board) {
+    private void setupBoardScene(Stage primaryStage, Board board) {
         imageProvider.init();
 
-        // Big grid
         GridPane grid = new GridPane();
         grid.setAlignment(Pos.CENTER);
         grid.setHgap(10);
         grid.setVgap(10);
         grid.setPadding(new Insets(25, 25, 25, 25));
 
-        // 2. Title node
-        Text sceneTitle = new Text("Welcome");
-        sceneTitle.setFont(Font.font("Tahoma", FontWeight.NORMAL, 20));
-        grid.add(sceneTitle, 0, 0, 2, 1);
+        grid.add(createBoardNode(board), 1, 1);
+        grid.add(createMenuNode(primaryStage), 1, 2);
+        grid.add(createLogNode(), 1, 3);
 
-        // 3. Board node
-        GridPane boardScene = new GridPane();
-
-        int boardSize = board.size();
-        for (int i = 0; i < boardSize; i++) {
-            for (int j = 0; j < boardSize; j++) {
-                Image image = imageProvider.getImage(board.get(i, j));
-                ImageView imageView = new ImageView(image);
-                boardScene.add(imageView, i, j);
-            }
-        }
-
-        grid.add(boardScene, 1, 3);
-
-
-        // 3. Buttons node
-        Button newBtn = new Button("New");
-        Button saveBtn = new Button("Save");
-        Button loadBtn = new Button("Load");
-        Button solveBtn = new Button("Solve");
-
-        newBtn.setMaxWidth(Double.MAX_VALUE);
-        saveBtn.setMaxWidth(Double.MAX_VALUE);
-        loadBtn.setMaxWidth(Double.MAX_VALUE);
-        solveBtn.setMaxWidth(Double.MAX_VALUE);
-
-        VBox vbBtn = new VBox();
-        vbBtn.getChildren().addAll(newBtn, saveBtn, loadBtn, solveBtn);
-        grid.add(vbBtn, 1, 4);
-
-        // 3. Action node
-        final Text actionTarget = new Text();
-        grid.add(actionTarget, 1, 6);
-
-        newBtn.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent e) {
-                actionTarget.setFill(Color.FIREBRICK);
-                actionTarget.setText("New button pressed");
-            }
-        });
-
-        // 4. Scene node
-        Scene scene = new Scene(grid, 300, 275);
+        Scene scene = new Scene(grid);
         primaryStage.setScene(scene);
-        primaryStage.show();
     }
 
 
 
     private void reset(Stage primaryStage) {
+        setupMenuScene(primaryStage);
+    }
 
+    private Node createBoardNode(Board board) {
+        GridPane boardScene = new GridPane();
+        int boardSize = board.size();
+        for (int i = 0; i < boardSize; i++) {
+            for (int j = 0; j < boardSize; j++) {
+                Block block = board.get(i, j);
+                Image image = imageProvider.getImage(block);
+                ImageView imageView = new ImageView(image);
+                boardScene.add(imageView, i, j);
+                attachClickHandler(imageView, board, block, i, j);
+            }
+        }
+        return boardScene;
+    }
+
+    private void attachClickHandler(ImageView imageView, Board board, Block block, int i, int j) {
+        imageView.setOnMouseClicked(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+                if (event.getButton() == MouseButton.PRIMARY) {
+                    handleLeftClick(imageView, board.get(i, j), i, j);
+                } else {
+                    handleRightClick(imageView, board, i, j);
+                }
+            }
+        });
+    }
+
+    private void handleLeftClick(ImageView imageView, Block block, int i, int j) {
+        System.out.println("left clicked: " + i + " " + j);
+        System.out.println("Block:  " + block.getClass());
+        block.rotate();
+        System.out.println("New angle: " + block.getAngle());
+        Image newImage = imageProvider.getImage(block);
+        System.out.println("New image: " + newImage);
+        imageView.setImage(newImage);
+    }
+
+    private void handleRightClick(ImageView imageView, Board board, int i, int j) {
+        System.out.println("right clicked: " + i + " " + j);
+        Block newBlock = board.changeBlockType(i, j);
+        System.out.println("New block type: " + newBlock.getClass().getSimpleName());
+        Image newImage = imageProvider.getImage(newBlock);
+        imageView.setImage(newImage);
+    }
+
+    private Node createMenuNode(Stage primaryStage) {
+        Button menuBtn = new Button("Menu");
+        menuBtn.setOnAction((ActionEvent e) -> reset(primaryStage));
+
+        Button saveBtn = new Button("Save");
+        Button loadBtn = new Button("Load");
+        Button solveBtn = new Button("Solve");
+
+        menuBtn.setMaxWidth(Double.MAX_VALUE);
+        saveBtn.setMaxWidth(Double.MAX_VALUE);
+        loadBtn.setMaxWidth(Double.MAX_VALUE);
+        solveBtn.setMaxWidth(Double.MAX_VALUE);
+
+        VBox vbBtn = new VBox();
+        vbBtn.getChildren().addAll(menuBtn, saveBtn, loadBtn, solveBtn);
+        return vbBtn;
+    }
+
+    private Node createLogNode() {
+        logBox = new Text();
+        return logBox;
+    }
+
+    private void log(String message) {
+        logBox.setText(message);
     }
 }

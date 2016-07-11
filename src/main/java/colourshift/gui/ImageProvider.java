@@ -3,13 +3,12 @@ package colourshift.gui;
 import colourshift.model.Colour;
 import colourshift.model.angle.Angle;
 import colourshift.model.blocks.Block;
-import colourshift.model.blocks.BlockFactory.BlockType;
+import colourshift.model.blocks.BlockType;
 import com.google.common.base.Objects;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.image.Image;
-import org.springframework.stereotype.*;
 import org.springframework.stereotype.Component;
 
 import java.awt.*;
@@ -67,9 +66,6 @@ public class ImageProvider {
     }
 
     public Image getImage(Block block) {
-        if (block == null) {
-            System.out.println("block: " + block);
-        }
         BlockType type = BlockType.fromJavaClass(block.getClass());
         Angle angle = block.getAngle();
         List<Colour> colours = block.getPower().toColoursList();

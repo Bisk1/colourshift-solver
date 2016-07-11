@@ -51,4 +51,12 @@ public class Border {
 			return Optional.empty();
 		}
 	}
+
+	public void changeBlock(Block oldBlock, Block newBlock) {
+		if (oldBlock == neighbour1) {
+			neighbour1 = newBlock;
+		} else {
+			neighbour2 = newBlock;
+		}
+	}
 }

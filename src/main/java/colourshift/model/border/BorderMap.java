@@ -65,6 +65,11 @@ public class BorderMap {
 		.map(Optional::get)
 		.reduce(Colour.GREY, (colour1, colour2) -> colour1.plus(colour2));
 	}
-	
+
+	public void changeBlock(Block newBlock) {
+		for (BorderView borderView : map.values()) {
+            borderView.changeBlock(newBlock);
+        }
+	}
 
 }

@@ -22,4 +22,9 @@ public class BorderView {
 	public Optional<Colour> getIncomingColour() {
 		return border.getIncomingColour(block);
 	}
+
+	public void changeBlock(Block newBlock) {
+        border.changeBlock(block, newBlock);
+        block = newBlock;
+	}
 }

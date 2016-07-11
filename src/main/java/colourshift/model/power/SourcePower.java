@@ -2,7 +2,10 @@ package colourshift.model.power;
 
 import colourshift.model.Colour;
 
-public class SourcePower {
+import java.util.Arrays;
+import java.util.List;
+
+public class SourcePower implements Power {
 
 	private Colour colour;
 	
@@ -12,5 +15,15 @@ public class SourcePower {
 	
 	public Colour getColour() {
 		return colour;
+	}
+
+	@Override
+	public Power copy() {
+		return new SourcePower(colour);
+	}
+
+	@Override
+	public List<Colour> toColoursList() {
+		return Arrays.asList(colour);
 	}
 }
