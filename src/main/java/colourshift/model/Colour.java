@@ -1,5 +1,6 @@
 package colourshift.model;
 
+import java.awt.*;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -7,66 +8,64 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
 public enum Colour {
-	
-	GREY,
-	RED,
-	GREEN,
-	BLUE,
-	YELLOW,
-	MAGENTA,
-	CYAN,
-	WHITE;
-	
-	
-	private enum Component {
-		RED,
-		GREEN,
-		BLUE
-	}
-	
-	private static Map<Colour, Set<Component>> coloursToComponents;
-	private static Map<Set<Component>, Colour> componentsToColours;
-	static {
-		coloursToComponents = new HashMap<Colour, Set<Component>>();
-		coloursToComponents.put(GREY, ImmutableSet.of());
-		coloursToComponents.put(RED, ImmutableSet.of(Component.RED));
-		coloursToComponents.put(GREEN, ImmutableSet.of(Component.GREEN));
-		coloursToComponents.put(BLUE, ImmutableSet.of(Component.BLUE));
-		coloursToComponents.put(YELLOW, ImmutableSet.of(Component.RED, Component.GREEN));
-		coloursToComponents.put(MAGENTA, ImmutableSet.of(Component.RED, Component.BLUE));
-		coloursToComponents.put(CYAN, ImmutableSet.of(Component.GREEN, Component.BLUE));
-		coloursToComponents.put(WHITE, ImmutableSet.of(Component.GREEN, Component.GREEN, Component.BLUE));
-		
-		for (Entry<Colour, Set<Component>> colourToComponents : coloursToComponents.entrySet()) {
-			componentsToColours.put(colourToComponents.getValue(), colourToComponents.getKey());
-		}
-	}
-	
-	public Set<Component> getComponents() {
-		return coloursToComponents.get(this);
-	}
-	
-	private static Colour colourOfComponents(Set<Component> components) {
-		return componentsToColours.get(components);
-	}
-	
-	public Colour plus(Colour other) {
-		Set<Component> componentsSum = Sets.union(getComponents(), other.getComponents());
-		return colourOfComponents(componentsSum);
-	}
-	
-	public boolean isSubcolour(Colour other) {
-		return other.getComponents().containsAll(getComponents());
-	}
-	
-	public static Colour mix(Collection<Colour> colours) {
-		return colours
-				.stream()
-				.reduce(Colour.GREY,
-						(colour1, colour2) -> colour1.plus(colour2));
-	}
-	
+
+    GREY(ImmutableSet.of(), new Color(128, 128, 128)),
+    RED(ImmutableSet.of(Component.RED), new Color(255, 0, 0)),
+    GREEN(ImmutableSet.of(Component.GREEN), new Color(0, 255, 0)),
+    BLUE(ImmutableSet.of(Component.BLUE), new Color(0, 0, 255)),
+    YELLOW(ImmutableSet.of(Component.RED, Component.GREEN), new Color(255, 255, 0)),
+    MAGENTA(ImmutableSet.of(Component.RED, Component.BLUE), new Color(255, 0, 255)),
+    CYAN(ImmutableSet.of(Component.GREEN, Component.BLUE), new Color(0, 255, 255)),
+    WHITE(ImmutableSet.of(Component.GREEN, Component.GREEN, Component.BLUE), new Color(255, 255, 255));
+
+    private static class Holder {
+        static Map<Colour, Set<Component>> coloursToComponents = Maps.newHashMap();
+        static Map<Set<Component>, Colour> componentsToColours = Maps.newHashMap();
+    }
+
+    private Color awtColor;
+
+    Colour(ImmutableSet<Component> components, Color awtColor) {
+        Holder.coloursToComponents.put(this, components);
+        Holder.componentsToColours.put(components, this);
+        this.awtColor = awtColor;
+    }
+
+    private enum Component {
+        RED,
+        GREEN,
+        BLUE
+    }
+
+    public Set<Component> getComponents() {
+        return Holder.coloursToComponents.get(this);
+    }
+
+    private static Colour colourOfComponents(Set<Component> components) {
+        return Holder.componentsToColours.get(components);
+    }
+
+    public Colour plus(Colour other) {
+        Set<Component> componentsSum = Sets.union(getComponents(), other.getComponents());
+        return colourOfComponents(componentsSum);
+    }
+
+    public boolean isSubcolour(Colour other) {
+        return other.getComponents().containsAll(getComponents());
+    }
+
+    public static Colour mix(Collection<Colour> colours) {
+        return colours
+                .stream()
+                .reduce(Colour.GREY, Colour::plus);
+    }
+
+    public Color getAwtColor() {
+        return awtColor;
+    }
+
 }

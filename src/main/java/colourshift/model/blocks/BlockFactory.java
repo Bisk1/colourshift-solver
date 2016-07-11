@@ -80,8 +80,7 @@ public class BlockFactory {
 	}
 
 	public Block createAndInitBlock(BlockType blockType, Optional<Colour> colour) {
-		Preconditions.checkArgument(colour.isPresent() || !blockTypesThatRequireColour.contains(blockType));
-		Block block = createBlock(blockType, colour.get());
+		Block block = createBlock(blockType, colour);
 		
 		if (block instanceof Source) {
 			sourceManager.add((Source)block);
@@ -92,12 +91,13 @@ public class BlockFactory {
 		return block;
 	}
 
-	private Block createBlock(BlockType blockType, Colour colour) {
+	private Block createBlock(BlockType blockType, Optional<Colour> colour) {
+		Preconditions.checkArgument(colour.isPresent() || !blockTypesThatRequireColour.contains(blockType));
 		switch (blockType) {
 		case EMPTY:
 			return Empty.getInstance();
 		case TARGET:
-			return new Target(colour);
+			return new Target(colour.get());
 		case STRAIGHT:
 			return new Straight();
 		case TURN:
@@ -111,15 +111,15 @@ public class BlockFactory {
 		case FULL_FOUR:
 			return new FullFour();
 		case SOURCE_ONE:
-			return new SourceOne(colour);
+			return new SourceOne(colour.get());
 		case SOURCE_STRAIGHT:
-			return new SourceStraight(colour);
+			return new SourceStraight(colour.get());
 		case SOURCE_TURN:
-			return new SourceTurn(colour);
+			return new SourceTurn(colour.get());
 		case SOURCE_THREE:
-			return new SourceThree(colour);
+			return new SourceThree(colour.get());
 		case SOURCE_FOUR:
-			return new SourceFour(colour);
+			return new SourceFour(colour.get());
 		default:
 			throw new RuntimeException("Unkown block type: " + blockType);
 		}

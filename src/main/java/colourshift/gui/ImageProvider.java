@@ -1,121 +1,142 @@
 package colourshift.gui;
 
+import colourshift.model.Colour;
+import colourshift.model.angle.Angle;
+import colourshift.model.blocks.Block;
+import colourshift.model.blocks.BlockFactory.BlockType;
+import com.google.common.base.Objects;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import javafx.embed.swing.SwingFXUtils;
+import javafx.scene.image.Image;
+import org.springframework.stereotype.*;
+import org.springframework.stereotype.Component;
+
+import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import java.util.stream.IntStream;
 
-import com.google.common.base.Objects;
-
-import colourshift.model.Colour;
-import colourshift.model.angle.Angle;
-import colourshift.model.blocks.Block;
-import colourshift.model.blocks.BlockFactory;
-import colourshift.model.blocks.BlockFactory.BlockType;
-import colourshift.model.blocks.SourceManager;
-import colourshift.model.blocks.TargetManager;
-import com.google.common.collect.Lists;
-import javafx.scene.image.Image;
-import javafx.scene.image.PixelWriter;
-import javafx.scene.image.WritableImage;
-
+@Component
 public class ImageProvider {
 
-	/**
-	 * Compound key which uniquely identifies image for a block.
-	 */
-	private static class BlockKey {
-		private BlockType blockType;
-		private Angle angle;
-		private List<Colour> colours;
+    private static final String IMAGE_TEMPLATE_EXTENSION = ".png";
+    /**
+     * Compound key which uniquely identifies image for a block.
+     */
+    private static class BlockKey {
+        private BlockType blockType;
+        private Angle angle;
+        private List<Colour> colours;
 
-		public BlockKey(BlockType blockType, Angle angle, List<Colour> colours) {
-			this.blockType = blockType;
-			this.angle = angle;
-			this.colours = colours;
-		}
+        public BlockKey(BlockType blockType, Angle angle, List<Colour> colours) {
+            this.blockType = blockType;
+            this.angle = angle;
+            this.colours = colours;
+        }
 
-		@Override
-		public boolean equals(Object object) {
-			if (object instanceof BlockKey) {
-				BlockKey k = (BlockKey) object;
-				return Objects.equal(blockType, k.blockType) && Objects.equal(angle, k.angle)
-						&& Objects.equal(colours, k.colours);
-			}
-			return false;
-		}
+        @Override
+        public boolean equals(Object object) {
+            if (object instanceof BlockKey) {
+                BlockKey k = (BlockKey) object;
+                return Objects.equal(blockType, k.blockType) && Objects.equal(angle, k.angle)
+                        && Objects.equal(colours, k.colours);
+            }
+            return false;
+        }
 
-		@Override
-		public int hashCode() {
-			return Objects.hashCode(blockType, angle, colours);
-		}
-	}
+        @Override
+        public int hashCode() {
+            return Objects.hashCode(blockType, angle, colours);
+        }
+    }
 
-	private static Map<BlockKey, Image> blockKeyToImage;
-	
-    private ImageProvider() {
-        this.loadImages();
-	}
-		
-	public Image getImage(Block block) {
-		BlockType type = BlockType.fromJavaClass(block.getClass());
-		Angle angle = block.getAngle();
-		List<Colour> colours = block.getPower().toColoursList();
-		BlockKey blockKey = new BlockKey(type, angle, colours);
-		return blockKeyToImage.get(blockKey);
-	}
-	
-	private void loadImages() {
-		String imagesRootDir = String.valueOf(ImageProvider.class.getClassLoader().getResource("blocks"));
-		BlockFactory blockFactory = new BlockFactory(new SourceManager(), new TargetManager()); // TODO: inject
-		for (BlockType blockType : BlockType.values()) {
-			String blockImagePath = imagesRootDir + File.separator + blockType.getJavaClass().getName();
+    private static final int ORANGE_RGB = new Color(255, 128, 0).getRGB();
+    private static final int PINK_RGB = new Color(255, 0, 220).getRGB();
+
+    private static Map<BlockKey, Image> blockKeyToImage = Maps.newHashMap();
+
+    /**
+     * Must be called after internal graphics initialized (stage shown) and before images are requested
+     */
+    public void init() {
+        loadImages();
+    }
+
+    public Image getImage(Block block) {
+        if (block == null) {
+            System.out.println("block: " + block);
+        }
+        BlockType type = BlockType.fromJavaClass(block.getClass());
+        Angle angle = block.getAngle();
+        List<Colour> colours = block.getPower().toColoursList();
+        BlockKey blockKey = new BlockKey(type, angle, colours);
+        return blockKeyToImage.get(blockKey);
+    }
+
+    private void loadImages() {
+        String imagesRootDir = String.valueOf(ImageProvider.class.getClassLoader().getResource("blocks"));
+        for (BlockType blockType : BlockType.values()) {
+            String blockImagePath = imagesRootDir + File.separator + blockType.getJavaClass().getSimpleName() + IMAGE_TEMPLATE_EXTENSION;
             Image blockImage = new Image(blockImagePath);
-			Block block = blockFactory.createAndInitBlock(blockType, Optional.of(Colour.GREY));
-            loadBlockImages(blockType, block, blockImage);
-		}
+            loadBlockImages(blockType, blockImage);
+        }
 
-	}
+    }
 
-    private void loadBlockImages(BlockType blockType, Block block, Image blockImageTemplate) {
-        Image blockImage =  blockImageTemplate;
+    private void loadBlockImages(BlockType blockType, Image blockImageTemplate) {
+        BufferedImage blockImage = SwingFXUtils.fromFXImage(blockImageTemplate, null);
         for (Angle angle : blockType.getInitialAngles()) {
             if (blockType.getColoursCount() == 0) {
-                blockKeyToImage.put(new BlockKey(blockType, angle, Lists.newArrayList()), blockImage);
+                addImageEntry(blockType, angle, Lists.newArrayList(), blockImage);
             } else {
                 for (Colour firstColour : Colour.values()) {
+                    BufferedImage imageColoredOnce = mask(blockImage, ORANGE_RGB, firstColour.getAwtColor().getRGB());
                     if (blockType.getColoursCount() == 1) {
-
+                        addImageEntry(blockType, angle, Lists.newArrayList(firstColour), imageColoredOnce);
+                    } else {
+                        for (Colour secondColour : Colour.values()) {
+                            BufferedImage imageColoredTwice = mask(imageColoredOnce, PINK_RGB, secondColour.getAwtColor().getRGB());
+                            addImageEntry(blockType, angle, Lists.newArrayList(firstColour, secondColour), imageColoredTwice);
+                        }
                     }
                 }
             }
-            blockImage = getRotatedImage(blockImage, 90);
+            blockImage = getRotatedImage(blockImage, Math.PI / 4);
         }
     }
 
-    private static Image getRotatedImage(Image bufferedImage, int angle) {
+    private void addImageEntry(BlockType blockType, Angle angle, List<Colour> colours, BufferedImage blockImage) {
+        Image image = SwingFXUtils.toFXImage(blockImage, null);
+        BlockKey blockKey = new BlockKey(blockType, angle, colours);
+        blockKeyToImage.put(blockKey, image);
+    }
+
+    private static BufferedImage getRotatedImage(BufferedImage image, double angle) {
         AffineTransform transform = new AffineTransform();
         transform.rotate(angle);
         AffineTransformOp op = new AffineTransformOp(transform, AffineTransformOp.TYPE_BILINEAR);
-        reutrn op.filter(bufferedImage, null);
-        return bufferedImage;
+        return op.filter(image, null);
     }
 
-    private static Image bufferedImageToWriteableImage(BufferedImage bufferedImage) {
-        WritableImage writeableImage = null;
-        if (bufferedImage != null) {
-            writeableImage = new WritableImage(bufferedImage.getWidth(), bufferedImage.getHeight());
-            PixelWriter pw = writeableImage.getPixelWriter();
-            for (int x = 0; x < bufferedImage.getWidth(); x++) {
-                for (int y = 0; y < bufferedImage.getHeight(); y++) {
-                    pw.setArgb(x, y, bufferedImage.getRGB(x, y));
+    private BufferedImage mask(BufferedImage image, int mask, int desired) {
+        int width = image.getWidth();
+        int height = image.getHeight();
+        BufferedImage newImage = new BufferedImage(width, height, image.getType());
+        for (int i = 0; i < width; i++) {
+            for (int j = 0; j < height; j++) {
+                int color = image.getRGB(i, j);
+                if (color == mask) {
+                    newImage.setRGB(i, j, desired);
+                } else {
+                    newImage.setRGB(i, j, color);
                 }
             }
         }
-        return writeableImage;
+
+        return newImage;
     }
 }

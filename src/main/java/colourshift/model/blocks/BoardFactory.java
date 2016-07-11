@@ -10,19 +10,26 @@ import com.google.common.collect.Table.Cell;
 import colourshift.model.Direction;
 import colourshift.model.border.Border;
 import colourshift.model.border.BorderMap;
+import org.springframework.stereotype.Component;
 
+@Component
 public class BoardFactory {
 
+    public enum Wrap {
+        ENABLED,
+        DISABLED
+    }
+
 	private BlockFactory blockFactory;
-	
-	public BoardFactory(BlockFactory blockFactory) {
-		this.blockFactory = blockFactory;
+
+	public BoardFactory() {
+		this.blockFactory = new BlockFactory(new SourceManager(), new TargetManager());
 	}
 
-	public Board createEmpty(int rows, int cols, boolean wrapEnabled) {
+	public Board createEmpty(int rows, int cols, Wrap wrap) {
 		
 		Table<Integer, Integer, Block> blocks = createBlocks(cols, rows);
-		wireNeighbours(blocks, rows, cols, wrapEnabled);
+		wireNeighbours(blocks, rows, cols, wrap);
 		return new Board(blocks, blockFactory);
 	}
 	private Table<Integer, Integer, Block> createBlocks(int rows, int cols) {
@@ -35,8 +42,8 @@ public class BoardFactory {
 		return blocks;
 	}
 
-	private void wireNeighbours(Table<Integer, Integer, Block> blocks, int rows, int cols, boolean wrapEnabled) {
-		Map<Block, BorderMap.Builder> bordersMapsBuilders = Maps.newHashMap();
+	private void wireNeighbours(Table<Integer, Integer, Block> blocks, int rows, int cols, Wrap wrap) {
+		Table<Integer, Integer, BorderMap.Builder> bordersMapsBuilders = HashBasedTable.create(rows, cols);
 		/**
 		 * In the first iteration create border on the left and up - all borders will
 		 * be created without duplicates, but blocks will not have relevant borders 
@@ -44,16 +51,16 @@ public class BoardFactory {
 		 */
 		for (Cell<Integer, Integer, Block> cell : blocks.cellSet()) {
 			BorderMap.Builder builder = new BorderMap.Builder();
-			bordersMapsBuilders.put(cell.getValue(), builder);
+			bordersMapsBuilders.put(cell.getColumnKey(), cell.getRowKey(), builder);
 			boolean isLeftmostBlock = cell.getColumnKey() == 0;
 			boolean isUpmostBlock = cell.getRowKey() == 0;
-			if (!isLeftmostBlock || wrapEnabled) {
+			if (!isLeftmostBlock || wrap == Wrap.ENABLED) {
 				Block leftBlock = isLeftmostBlock ? 
 						blocks.get(cell.getRowKey(), cols - 1):
 						blocks.get(cell.getRowKey(), cell.getColumnKey() - 1);
 				builder.setBorder(Direction.LEFT, new Border(cell.getValue(), Direction.LEFT, leftBlock));
 			}
-			if (!isUpmostBlock || wrapEnabled) {
+			if (!isUpmostBlock || wrap == Wrap.ENABLED) {
 				Block upBlock = isUpmostBlock ? 
 						blocks.get(rows - 1, cell.getColumnKey()) :
 						blocks.get(cell.getRowKey() - 1, cell.getColumnKey());
@@ -66,25 +73,19 @@ public class BoardFactory {
 		 */
 
 		for (Cell<Integer, Integer, Block> cell : blocks.cellSet()) {
-			BorderMap.Builder builder = bordersMapsBuilders.get(cell.getValue());
+			BorderMap.Builder builder = bordersMapsBuilders.get(cell.getColumnKey(), cell.getRowKey());
 			boolean isRightmostBlock = cell.getColumnKey() == cols - 1;
 			boolean isDownmostBlock = cell.getRowKey() == rows - 1;
-			if (!isRightmostBlock || wrapEnabled) {
-				Block rightBlock = isRightmostBlock ? 
-						blocks.get(cell.getRowKey(), 0):
-						blocks.get(cell.getRowKey(), cell.getColumnKey() - 1);
-				BorderMap.Builder rightBuilder = bordersMapsBuilders.get(rightBlock);
-				
+			if (!isRightmostBlock || wrap == Wrap.ENABLED) {
+                int rightBlockColumnKey = isRightmostBlock ? 0 : cell.getColumnKey() + 1;
+				BorderMap.Builder rightBuilder = bordersMapsBuilders.get(rightBlockColumnKey, cell.getRowKey());
 				builder.setBorder(Direction.RIGHT, rightBuilder.getBorder(Direction.LEFT));
 			}
-			if (isDownmostBlock || wrapEnabled) {
-				Block downBlock = isDownmostBlock ? 
-						blocks.get(0, cell.getColumnKey()) :
-						blocks.get(cell.getRowKey() - 1, cell.getColumnKey());
-						
-				BorderMap.Builder downBuilder = bordersMapsBuilders.get(downBlock);
-				builder.setBorder(Direction.DOWN, downBuilder.getBorder(Direction.DOWN));
-			}
+			if (!isDownmostBlock || wrap == Wrap.ENABLED) {
+                int downBlockRowKey = isDownmostBlock ? 0 : cell.getRowKey() + 1;
+                BorderMap.Builder downBuilder = bordersMapsBuilders.get(cell.getColumnKey(), downBlockRowKey);
+                builder.setBorder(Direction.DOWN, downBuilder.getBorder(Direction.UP));
+            }
 			// All borders set - builders ready to execute
 			cell.getValue().setBorderMap(builder.build(cell.getValue()));
 		}
