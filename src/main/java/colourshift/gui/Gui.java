@@ -64,7 +64,6 @@ public class Gui {
         HBox wrapBox = new HBox(wrapLabel, wrapInput);
         grid.add(wrapBox, 0, 2);
 
-        VBox vBox = new VBox(newBtn, sizeBox, wrapBox);
 
         newBtn.setOnAction((ActionEvent e) -> {
                 int boardSizeInt = Integer.parseInt(sizeInput.getText());
@@ -73,6 +72,12 @@ public class Gui {
                 setupBoardScene(primaryStage, board);
             }
         );
+
+        Button loadBtn = new Button("Load");
+        grid.add(loadBtn, 0, 3);
+        loadBtn.setOnAction((ActionEvent e) -> load(primaryStage));
+
+        VBox vBox = new VBox(newBtn, sizeBox, wrapBox, loadBtn);
 
         primaryStage.setScene(new Scene(vBox));
         primaryStage.show();
@@ -94,6 +99,7 @@ public class Gui {
 
         Scene scene = new Scene(grid);
         primaryStage.setScene(scene);
+        primaryStage.sizeToScene();
     }
 
     private Node createBoardNode(Board board) {
@@ -141,18 +147,14 @@ public class Gui {
         Button saveBtn = new Button("Save");
         saveBtn.setOnAction((ActionEvent e) -> save(primaryStage, board));
 
-        Button loadBtn = new Button("Load");
-        loadBtn.setOnAction((ActionEvent e) -> load(primaryStage));
-
         Button solveBtn = new Button("Solve");
 
         menuBtn.setMaxWidth(Double.MAX_VALUE);
         saveBtn.setMaxWidth(Double.MAX_VALUE);
-        loadBtn.setMaxWidth(Double.MAX_VALUE);
         solveBtn.setMaxWidth(Double.MAX_VALUE);
 
         VBox vbBtn = new VBox();
-        vbBtn.getChildren().addAll(menuBtn, saveBtn, loadBtn, solveBtn);
+        vbBtn.getChildren().addAll(menuBtn, saveBtn, solveBtn);
         return vbBtn;
     }
 

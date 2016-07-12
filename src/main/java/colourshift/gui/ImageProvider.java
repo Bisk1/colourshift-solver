@@ -24,6 +24,8 @@ public class ImageProvider {
 
     private static final String BLOCKS_IMAGES_DIRECTORY = "blocks";
     private static final String IMAGE_TEMPLATE_EXTENSION = ".png";
+
+    private boolean imagesLoaded = false;
     /**
      * Compound key which uniquely identifies image for a block.
      */
@@ -63,7 +65,10 @@ public class ImageProvider {
      * Must be called after internal graphics initialized (stage shown) and before images are requested
      */
     public void init() {
-        loadImages();
+        if (!imagesLoaded) {
+            loadImages();
+            imagesLoaded = true;
+        }
     }
 
     public Image getImage(Block block) {
