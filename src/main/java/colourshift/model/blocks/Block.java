@@ -1,18 +1,18 @@
 package colourshift.model.blocks;
 
-import java.util.List;
-import java.util.Set;
-
-import com.google.common.collect.Sets;
-
 import colourshift.model.Colour;
 import colourshift.model.Direction;
 import colourshift.model.angle.Angle;
 import colourshift.model.border.BorderMap;
 import colourshift.model.power.Power;
 import colourshift.util.IterationUtils;
+import com.google.common.collect.Sets;
 
-public abstract class Block {
+import java.io.Serializable;
+import java.util.List;
+import java.util.Set;
+
+public abstract class Block implements Serializable {
 
 	/**
 	 * Angle can be modified by rotating the block.
@@ -44,22 +44,24 @@ public abstract class Block {
 
 	public abstract void updateReceived(Direction fromDirection, Colour colour);
 
+    public abstract void fullUpdate();
+
+    public abstract void fullClear();
+
 	public boolean isFixed() {
 		return feasibleAngles.size() == 1;
 	}
 
 	public void rotate() {
+        fullClear();
 		if (!isFixed()) {
 			angle = IterationUtils.getNextFromListIfInSet(angle, initialAngles, feasibleAngles);
 		}
+        fullUpdate();
 	}
 	
 	public Angle getAngle() {
 		return angle;
-	}
-	
-	public Set<Angle> getFeasibleAngles() {
-		return feasibleAngles;
 	}
 
 	public abstract Power getPower();

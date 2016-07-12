@@ -6,32 +6,32 @@ import java.util.List;
 import colourshift.model.Colour;
 
 public class HalfFourPower implements Power {
-	private Colour left;
-	private Colour right;
-	
+	private Colour horizontal;
+	private Colour vertical;
+
 	public HalfFourPower() {
-		this.left = Colour.GREY;
-		this.right = Colour.GREY;
+		this.horizontal = Colour.GREY;
+		this.vertical = Colour.GREY;
 	}
-	
+
 	@Override
 	public Power copy() {
 		HalfFourPower copy = new HalfFourPower();
-		copy.setLeft(left);
-		copy.setRight(right);
+		copy.setHorizontal(horizontal);
+		copy.setVertical(vertical);
 		return copy;
 	}
 
 	@Override
 	public List<Colour> toColoursList() {
-		return Arrays.asList(left, right);
+		return Arrays.asList(horizontal, vertical);
 	}
-	
-	public void setLeft(Colour left) {
-		this.left = left;
+
+	public void setHorizontal(Colour horizontal) {
+		this.horizontal = horizontal;
 	}
-	
-	public void setRight(Colour right) {
-		this.right = right;
+
+	public void setVertical(Colour vertical) {
+		this.vertical = vertical;
 	}
 }

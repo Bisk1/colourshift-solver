@@ -15,7 +15,7 @@ public enum BlockType {
     STRAIGHT(Straight.class, 1, Orientation.values()),
     TURN(Turn.class, 1, TurnAngle.values()),
     THREE(Three.class, 1, ThreeAngle.values()),
-    DOUBLE_TURN(DoubleTurn.class, 2, Single.values()),
+    DOUBLE_TURN(DoubleTurn.class, 2, DoubleTurnAngle.values()),
     HALF_FOUR(HalfFour.class, 2, Single.values()),
     FULL_FOUR(FullFour.class, 1, Single.values()),
     SOURCE_ONE(SourceOne.class, 1, Direction.values()),

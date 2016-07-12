@@ -4,6 +4,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
+import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableMap;
 
 import colourshift.model.Colour;
@@ -25,8 +28,8 @@ public class Turn extends TransitiveBlock {
 	}
 
 	@Override
-	protected Map<Angle, DirectionsDivision> getDirectonsDivisions() {
-		return ImmutableMap.of(
+	protected BiMap<Angle, DirectionsDivision> getDirectionsDivisions() {
+		return ImmutableBiMap.of(
 				TurnAngle.LEFT_UP, new DirectionsDivision(new DirectionSet(Direction.LEFT, Direction.UP)), 
 				TurnAngle.UP_RIGHT, new DirectionsDivision(new DirectionSet(Direction.UP, Direction.RIGHT)), 
 				TurnAngle.RIGHT_DOWN, new DirectionsDivision(new DirectionSet(Direction.RIGHT, Direction.DOWN)), 

@@ -1,11 +1,12 @@
 package colourshift.gui;
 
 import colourshift.model.blocks.Block;
-import colourshift.model.blocks.Board;
-import colourshift.model.blocks.BoardFactory;
-import colourshift.model.blocks.BoardFactory.Wrap;
+import colourshift.model.Board;
+import colourshift.model.BoardFactory;
+import colourshift.model.BoardFactory.Wrap;
+import com.google.common.collect.HashBasedTable;
+import com.google.common.collect.Table;
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
@@ -22,9 +23,12 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.io.*;
 
 @Component
 public class Gui {
@@ -85,71 +89,61 @@ public class Gui {
         grid.setPadding(new Insets(25, 25, 25, 25));
 
         grid.add(createBoardNode(board), 1, 1);
-        grid.add(createMenuNode(primaryStage), 1, 2);
+        grid.add(createMenuNode(primaryStage, board), 1, 2);
         grid.add(createLogNode(), 1, 3);
 
         Scene scene = new Scene(grid);
         primaryStage.setScene(scene);
     }
 
-
-
-    private void reset(Stage primaryStage) {
-        setupMenuScene(primaryStage);
-    }
-
     private Node createBoardNode(Board board) {
+        Table<Integer, Integer, ImageView> imageViewTable = HashBasedTable.create();
         GridPane boardScene = new GridPane();
-        int boardSize = board.size();
-        for (int i = 0; i < boardSize; i++) {
-            for (int j = 0; j < boardSize; j++) {
-                Block block = board.get(i, j);
+        for (int row = 0; row < board.size(); row++) {
+            for (int column = 0; column < board.size(); column++) {
+                Block block = board.get(row, column);
                 Image image = imageProvider.getImage(block);
                 ImageView imageView = new ImageView(image);
-                boardScene.add(imageView, i, j);
-                attachClickHandler(imageView, board, block, i, j);
+                boardScene.add(imageView, column, row);
+                attachClickHandler(imageView, board, row, column, imageViewTable);
+                imageViewTable.put(row, column, imageView);
             }
         }
         return boardScene;
     }
 
-    private void attachClickHandler(ImageView imageView, Board board, Block block, int i, int j) {
-        imageView.setOnMouseClicked(new EventHandler<MouseEvent>() {
-            @Override
-            public void handle(MouseEvent event) {
-                if (event.getButton() == MouseButton.PRIMARY) {
-                    handleLeftClick(imageView, board.get(i, j), i, j);
-                } else {
-                    handleRightClick(imageView, board, i, j);
-                }
+    private void refreshBoardNode(Board board, Table<Integer, Integer, ImageView> imageViewTable) {
+        for (int row = 0; row < board.size(); row++) {
+            for (int column = 0; column < board.size(); column++) {
+                Block block = board.get(row, column);
+                Image newImage = imageProvider.getImage(block);
+                imageViewTable.get(row, column).setImage(newImage);
             }
+        }
+    }
+
+    private void attachClickHandler(ImageView imageView, Board board, int row, int column, Table<Integer, Integer, ImageView> imageViewTable) {
+        imageView.setOnMouseClicked((MouseEvent event) -> {
+            Block block = board.get(row, column);
+            if (event.getButton() == MouseButton.PRIMARY) {
+                block.rotate();
+            } else {
+                block = board.changeBlockType(row, column);
+            }
+            refreshBoardNode(board, imageViewTable);
         });
     }
 
-    private void handleLeftClick(ImageView imageView, Block block, int i, int j) {
-        System.out.println("left clicked: " + i + " " + j);
-        System.out.println("Block:  " + block.getClass());
-        block.rotate();
-        System.out.println("New angle: " + block.getAngle());
-        Image newImage = imageProvider.getImage(block);
-        System.out.println("New image: " + newImage);
-        imageView.setImage(newImage);
-    }
-
-    private void handleRightClick(ImageView imageView, Board board, int i, int j) {
-        System.out.println("right clicked: " + i + " " + j);
-        Block newBlock = board.changeBlockType(i, j);
-        System.out.println("New block type: " + newBlock.getClass().getSimpleName());
-        Image newImage = imageProvider.getImage(newBlock);
-        imageView.setImage(newImage);
-    }
-
-    private Node createMenuNode(Stage primaryStage) {
+    private Node createMenuNode(Stage primaryStage, Board board) {
         Button menuBtn = new Button("Menu");
         menuBtn.setOnAction((ActionEvent e) -> reset(primaryStage));
 
         Button saveBtn = new Button("Save");
+        saveBtn.setOnAction((ActionEvent e) -> save(primaryStage, board));
+
         Button loadBtn = new Button("Load");
+        loadBtn.setOnAction((ActionEvent e) -> load(primaryStage));
+
         Button solveBtn = new Button("Solve");
 
         menuBtn.setMaxWidth(Double.MAX_VALUE);
@@ -160,6 +154,48 @@ public class Gui {
         VBox vbBtn = new VBox();
         vbBtn.getChildren().addAll(menuBtn, saveBtn, loadBtn, solveBtn);
         return vbBtn;
+    }
+
+    private void reset(Stage primaryStage) {
+        setupMenuScene(primaryStage);
+    }
+
+    private void save(Stage primaryStage, Board board) {
+        FileChooser fileChooser = new FileChooser();
+        FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("Board files (*.board)", "*.board");
+        fileChooser.getExtensionFilters().add(extFilter);
+        File file = fileChooser.showSaveDialog(primaryStage);
+        if(file != null) {
+            try {
+                if(!file.getName().contains(".")) {
+                    file = new File(file.getAbsolutePath() + ".board");
+                }
+                FileOutputStream fos = new FileOutputStream(file);
+                ObjectOutputStream oos = new ObjectOutputStream(fos);
+                oos.writeObject(board);
+                oos.close();
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        }
+    }
+
+    private void load(Stage primaryStage) {
+        FileChooser fileChooser = new FileChooser();
+        FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("Board files (*.board)", "*.board");
+        fileChooser.getExtensionFilters().add(extFilter);
+        File file = fileChooser.showOpenDialog(primaryStage);
+        if(file != null) {
+            try {
+                FileInputStream fis = new FileInputStream(file);
+                ObjectInputStream ois = new ObjectInputStream(fis);
+                Board board = (Board)ois.readObject();
+                ois.close();
+                setupBoardScene(primaryStage, board);
+            } catch (IOException|ClassNotFoundException ex) {
+                ex.printStackTrace();
+            }
+        }
     }
 
     private Node createLogNode() {

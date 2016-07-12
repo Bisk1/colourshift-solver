@@ -1,5 +1,6 @@
 package colourshift.model.blocks;
 
+import java.io.Serializable;
 import java.util.Optional;
 
 import com.google.common.base.Preconditions;
@@ -9,16 +10,14 @@ import com.google.common.collect.Sets;
 import colourshift.model.Colour;
 
 
-public class BlockFactory {
+public class BlockFactory implements Serializable {
 
     private ImmutableSet<BlockType> blockTypesThatRequireColour = Sets.immutableEnumSet(BlockType.TARGET, BlockType.SOURCE_ONE,
 			BlockType.SOURCE_STRAIGHT, BlockType.SOURCE_TURN, BlockType.SOURCE_THREE, BlockType.SOURCE_FOUR);
 
-	private SourceManager sourceManager;
 	private TargetManager targetManager;
 
-	public BlockFactory(SourceManager sourceManager, TargetManager targetManager) {
-		this.sourceManager = sourceManager;
+	public BlockFactory(TargetManager targetManager) {
 		this.targetManager = targetManager;
 	}
 
@@ -29,9 +28,7 @@ public class BlockFactory {
 	public Block createAndInitBlock(BlockType blockType, Optional<Colour> colour) {
 		Block block = createBlock(blockType, colour);
 		
-		if (block instanceof Source) {
-			sourceManager.add((Source)block);
-		} else if (block instanceof Target) {
+		if (block instanceof Target) {
 			targetManager.add((Target)block);
 		}
 		
@@ -42,7 +39,7 @@ public class BlockFactory {
 		Preconditions.checkArgument(colour.isPresent() || !blockTypesThatRequireColour.contains(blockType));
 		switch (blockType) {
 		case EMPTY:
-			return Empty.getInstance();
+			return new Empty();
 		case TARGET:
 			return new Target(colour.get());
 		case STRAIGHT:

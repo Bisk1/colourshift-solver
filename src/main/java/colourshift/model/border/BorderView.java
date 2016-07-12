@@ -1,11 +1,11 @@
 package colourshift.model.border;
 
-import java.util.Optional;
-
 import colourshift.model.Colour;
 import colourshift.model.blocks.Block;
 
-public class BorderView {
+import java.io.Serializable;
+
+public class BorderView implements Serializable {
 	
 	private Border border;
 	private Block block;
@@ -19,8 +19,8 @@ public class BorderView {
 		border.send(block, colour);
 	}
 
-	public Optional<Colour> getIncomingColour() {
-		return border.getIncomingColour(block);
+	public Colour getColour() {
+		return border.getColour();
 	}
 
 	public void changeBlock(Block newBlock) {

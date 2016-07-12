@@ -4,6 +4,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import colourshift.model.angle.Single;
+import com.google.common.collect.BiMap;
+import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableMap;
 
 import colourshift.model.Colour;
@@ -17,43 +20,26 @@ import colourshift.model.power.Power;
 public class HalfFour extends TransitiveBlock {
 
 	private HalfFourPower power;
-	
-	private enum HalfFourAngle implements Angle {
-		LEFT_DOWN_AND_UP_RIGHT,
-		LEFT_UP_AND_RIGHT_DOWN;
-	}
-	
+
 	public HalfFour() {
 		super();
 		this.power = new HalfFourPower();
 	}
 
 	@Override
-	protected Map<Angle, DirectionsDivision> getDirectonsDivisions() {
-		return ImmutableMap.of(HalfFourAngle.LEFT_DOWN_AND_UP_RIGHT, new DirectionsDivision(
-						new DirectionSet(Direction.LEFT, Direction.DOWN),
-						new DirectionSet(Direction.UP, Direction.RIGHT)),
-				HalfFourAngle.LEFT_UP_AND_RIGHT_DOWN, new DirectionsDivision(
-						new DirectionSet(Direction.LEFT, Direction.UP),
-						new DirectionSet(Direction.RIGHT, Direction.DOWN)));
+	protected Map<Angle, DirectionsDivision> getDirectionsDivisions() {
+		return ImmutableMap.of(Single.SINGLE, new DirectionsDivision(
+						new DirectionSet(Direction.LEFT, Direction.RIGHT),
+						new DirectionSet(Direction.UP, Direction.DOWN)));
 	}
 
 	@Override
 	void updatePower(Direction fromDirection, Colour colour) {
-		if (angle == HalfFourAngle.LEFT_DOWN_AND_UP_RIGHT) {
-			switch(fromDirection) {
-				case LEFT: case DOWN:
-					power.setLeft(colour);
-				default:
-					power.setRight(colour);
-			}
-		} else {
-			switch(fromDirection) {
-			case LEFT: case UP:
-				power.setLeft(colour);
+		switch(fromDirection) {
+			case LEFT: case RIGHT:
+				power.setHorizontal(colour);
 			default:
-				power.setRight(colour);
-			}
+				power.setVertical(colour);
 		}
 	}
 

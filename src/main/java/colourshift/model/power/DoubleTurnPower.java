@@ -6,32 +6,32 @@ import java.util.List;
 import colourshift.model.Colour;
 
 public class DoubleTurnPower implements Power {
-	private Colour horizontal;
-	private Colour vertical;
-	
+	private Colour left;
+	private Colour right;
+
 	public DoubleTurnPower() {
-		this.horizontal = Colour.GREY;
-		this.vertical = Colour.GREY;
+		this.left = Colour.GREY;
+		this.right = Colour.GREY;
 	}
-	
+
 	@Override
 	public Power copy() {
 		DoubleTurnPower copy = new DoubleTurnPower();
-		copy.setHorizontal(horizontal);
-		copy.setVertical(vertical);
+		copy.setLeft(left);
+		copy.setRight(right);
 		return copy;
 	}
 
 	@Override
 	public List<Colour> toColoursList() {
-		return Arrays.asList(horizontal, vertical);
+		return Arrays.asList(left, right);
 	}
-	
-	public void setHorizontal(Colour horizontal) {
-		this.horizontal = horizontal;
+
+	public void setLeft(Colour left) {
+		this.left = left;
 	}
-	
-	public void setVertical(Colour vertical) {
-		this.vertical = vertical;
+
+	public void setRight(Colour right) {
+		this.right = right;
 	}
 }

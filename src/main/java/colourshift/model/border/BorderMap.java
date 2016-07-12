@@ -1,17 +1,16 @@
 package colourshift.model.border;
 
-import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
-import com.google.common.collect.Maps;
-
 import colourshift.model.Colour;
 import colourshift.model.Direction;
 import colourshift.model.DirectionSet;
 import colourshift.model.blocks.Block;
+import com.google.common.collect.Maps;
 
-public class BorderMap {
+import java.io.Serializable;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+public class BorderMap implements Serializable {
 	private Map<Direction, BorderView> map;
 	
 	public static class Builder {
@@ -60,9 +59,7 @@ public class BorderMap {
 		return map.entrySet().stream()
 		.filter(directionToBorderView -> directionSet.contains(directionToBorderView.getKey()))
 		.map(Map.Entry::getValue)
-		.map(BorderView::getIncomingColour)
-		.filter(Optional::isPresent)
-		.map(Optional::get)
+		.map(BorderView::getColour)
 		.reduce(Colour.GREY, (colour1, colour2) -> colour1.plus(colour2));
 	}
 

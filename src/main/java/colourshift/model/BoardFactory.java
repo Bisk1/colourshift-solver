@@ -1,15 +1,13 @@
-package colourshift.model.blocks;
+package colourshift.model;
 
-import java.util.Map;
-
-import com.google.common.collect.HashBasedTable;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Table;
-import com.google.common.collect.Table.Cell;
-
-import colourshift.model.Direction;
+import colourshift.model.blocks.Block;
+import colourshift.model.blocks.BlockFactory;
+import colourshift.model.blocks.TargetManager;
 import colourshift.model.border.Border;
 import colourshift.model.border.BorderMap;
+import com.google.common.collect.HashBasedTable;
+import com.google.common.collect.Table;
+import com.google.common.collect.Table.Cell;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -23,7 +21,7 @@ public class BoardFactory {
 	private BlockFactory blockFactory;
 
 	public BoardFactory() {
-		this.blockFactory = new BlockFactory(new SourceManager(), new TargetManager());
+		this.blockFactory = new BlockFactory(new TargetManager());
 	}
 
 	public Board createEmpty(int rows, int cols, Wrap wrap) {
@@ -50,23 +48,23 @@ public class BoardFactory {
 		 * set on the right and down yet
 		 */
 		for (Cell<Integer, Integer, Block> cell : blocks.cellSet()) {
-			BorderMap.Builder builder = new BorderMap.Builder();
-			bordersMapsBuilders.put(cell.getColumnKey(), cell.getRowKey(), builder);
-			boolean isLeftmostBlock = cell.getColumnKey() == 0;
-			boolean isUpmostBlock = cell.getRowKey() == 0;
-			if (!isLeftmostBlock || wrap == Wrap.ENABLED) {
-				Block leftBlock = isLeftmostBlock ? 
-						blocks.get(cell.getRowKey(), cols - 1):
-						blocks.get(cell.getRowKey(), cell.getColumnKey() - 1);
-				builder.setBorder(Direction.LEFT, new Border(cell.getValue(), Direction.LEFT, leftBlock));
-			}
-			if (!isUpmostBlock || wrap == Wrap.ENABLED) {
-				Block upBlock = isUpmostBlock ? 
-						blocks.get(rows - 1, cell.getColumnKey()) :
-						blocks.get(cell.getRowKey() - 1, cell.getColumnKey());
-				builder.setBorder(Direction.UP, new Border(cell.getValue(), Direction.UP, upBlock));
-			}
-		}
+            BorderMap.Builder builder = new BorderMap.Builder();
+            bordersMapsBuilders.put(cell.getColumnKey(), cell.getRowKey(), builder);
+            boolean isLeftmostBlock = cell.getColumnKey() == 0;
+            boolean isUpmostBlock = cell.getRowKey() == 0;
+            if (!isLeftmostBlock || wrap == Wrap.ENABLED) {
+                Block leftBlock = isLeftmostBlock ?
+                        blocks.get(cell.getRowKey(), cols - 1) :
+                        blocks.get(cell.getRowKey(), cell.getColumnKey() - 1);
+                builder.setBorder(Direction.LEFT, new Border(leftBlock, Direction.LEFT, cell.getValue()));
+            }
+            if (!isUpmostBlock || wrap == Wrap.ENABLED) {
+                Block upBlock = isUpmostBlock ?
+                        blocks.get(rows - 1, cell.getColumnKey()) :
+                        blocks.get(cell.getRowKey() - 1, cell.getColumnKey());
+                builder.setBorder(Direction.UP, new Border(upBlock, Direction.UP, cell.getValue()));
+            }
+        }
 		/**
 		 * In the second iteration set border on the right and down - but don't create them
 		 * - reuse the relevant borders created in the first iteration.
@@ -87,7 +85,8 @@ public class BoardFactory {
                 builder.setBorder(Direction.DOWN, downBuilder.getBorder(Direction.UP));
             }
 			// All borders set - builders ready to execute
-			cell.getValue().setBorderMap(builder.build(cell.getValue()));
+			BorderMap borderMap = builder.build(cell.getValue());
+			cell.getValue().setBorderMap(borderMap);
 		}
 	}
 	

@@ -19,5 +19,4 @@ public class App extends Application {
         Gui gui = ctx.getBean(Gui.class);
         gui.init(primaryStage);
 	}
-
 }

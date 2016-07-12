@@ -2,9 +2,7 @@ package colourshift.model;
 
 import java.awt.*;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 
 import com.google.common.collect.ImmutableSet;
@@ -35,7 +33,7 @@ public enum Colour {
         this.awtColor = awtColor;
     }
 
-    private enum Component {
+    public enum Component {
         RED,
         GREEN,
         BLUE
@@ -45,13 +43,13 @@ public enum Colour {
         return Holder.coloursToComponents.get(this);
     }
 
-    private static Colour colourOfComponents(Set<Component> components) {
+    public static Colour fromComponents(Set<Component> components) {
         return Holder.componentsToColours.get(components);
     }
 
     public Colour plus(Colour other) {
         Set<Component> componentsSum = Sets.union(getComponents(), other.getComponents());
-        return colourOfComponents(componentsSum);
+        return fromComponents(componentsSum);
     }
 
     public boolean isSubcolour(Colour other) {

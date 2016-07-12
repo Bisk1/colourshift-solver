@@ -12,23 +12,26 @@ import colourshift.model.power.EmptyPower;
 
 public class Empty extends Block {
 
-	private static Empty INSTANCE;
-
-	public static Empty getInstance() {
-		if (INSTANCE == null) {
-			INSTANCE = new Empty();
-		}
-		return INSTANCE;
-	}
-	
 	@Override
 	public void updateReceived(Direction fromDirection, Colour colour) {
 		
 	}
 
 	@Override
+	public void fullUpdate() {
+
+	}
+
+	@Override
+	public void fullClear() {
+
+	}
+
+	@Override
 	public Power getPower() {
 		return EmptyPower.getInstance();
 	}
+
+
 	
 }

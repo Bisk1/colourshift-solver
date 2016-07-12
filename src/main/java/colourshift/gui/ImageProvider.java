@@ -22,6 +22,7 @@ import java.util.Map;
 @Component
 public class ImageProvider {
 
+    private static final String BLOCKS_IMAGES_DIRECTORY = "blocks";
     private static final String IMAGE_TEMPLATE_EXTENSION = ".png";
     /**
      * Compound key which uniquely identifies image for a block.
@@ -74,7 +75,7 @@ public class ImageProvider {
     }
 
     private void loadImages() {
-        String imagesRootDir = String.valueOf(ImageProvider.class.getClassLoader().getResource("blocks"));
+        String imagesRootDir = String.valueOf(ImageProvider.class.getClassLoader().getResource(BLOCKS_IMAGES_DIRECTORY));
         for (BlockType blockType : BlockType.values()) {
             String blockImagePath = imagesRootDir + File.separator + blockType.getJavaClass().getSimpleName() + IMAGE_TEMPLATE_EXTENSION;
             Image blockImage = new Image(blockImagePath);
@@ -101,7 +102,7 @@ public class ImageProvider {
                     }
                 }
             }
-            blockImage = getRotatedImage(blockImage, Math.PI / 4);
+            blockImage = getRotatedImage(blockImage, Math.PI / 2);
         }
     }
 
@@ -113,6 +114,7 @@ public class ImageProvider {
 
     private static BufferedImage getRotatedImage(BufferedImage image, double angle) {
         AffineTransform transform = new AffineTransform();
+        transform.translate(image.getWidth(), 0);
         transform.rotate(angle);
         AffineTransformOp op = new AffineTransformOp(transform, AffineTransformOp.TYPE_BILINEAR);
         return op.filter(image, null);
