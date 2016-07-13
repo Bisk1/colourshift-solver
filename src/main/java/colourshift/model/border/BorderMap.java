@@ -47,21 +47,6 @@ public class BorderMap implements Serializable {
 			map.get(toDirection).send(colour);
 		}
 	}
-	
-	/**
-	 * For all directions that are in the direction set, get all the colours that are sent
-	 * through them and mix the colours.
-	 * 
-	 * @param directionSet
-	 * @return mixed colour
-	 */
-	public Colour getColourMix(DirectionSet directionSet) {
-		return map.entrySet().stream()
-		.filter(directionToBorderView -> directionSet.contains(directionToBorderView.getKey()))
-		.map(Map.Entry::getValue)
-		.map(BorderView::getColour)
-		.reduce(Colour.GREY, (colour1, colour2) -> colour1.plus(colour2));
-	}
 
 	public void changeBlock(Block newBlock) {
 		for (BorderView borderView : map.values()) {
@@ -69,4 +54,26 @@ public class BorderMap implements Serializable {
         }
 	}
 
+	public Colour getIncomingColourMix(Direction direction) {
+		return map.get(direction).getIncomingColour();
+	}
+
+    /**
+     * For all directions that are in the direction set, get all the colours that are coming in
+     * through them and mix the colours.
+     *
+     * @param directionSet
+     * @return mixed colour
+     */
+	public Colour getIncomingColourMix(DirectionSet directionSet) {
+		return map.entrySet().stream()
+				.filter(directionToBorderView -> directionSet.contains(directionToBorderView.getKey()))
+				.map(Map.Entry::getValue)
+				.map(BorderView::getIncomingColour)
+				.reduce(Colour.GREY, (colour1, colour2) -> colour1.plus(colour2));
+	}
+
+    public boolean contains(Direction direction) {
+        return map.containsKey(direction);
+    }
 }

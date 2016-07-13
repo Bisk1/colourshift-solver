@@ -1,10 +1,10 @@
 package colourshift.gui;
 
-import colourshift.model.Colour;
-import colourshift.model.blocks.Block;
 import colourshift.model.Board;
 import colourshift.model.BoardFactory;
 import colourshift.model.BoardFactory.Wrap;
+import colourshift.model.Colour;
+import colourshift.model.blocks.Block;
 import colourshift.model.blocks.BlockFactory;
 import colourshift.model.blocks.BlockType;
 import colourshift.model.blocks.TargetManager;
@@ -23,6 +23,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
@@ -33,10 +34,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.*;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 @Component
 public class Gui {
@@ -51,6 +49,11 @@ public class Gui {
     private BlockFactory blockFactory = new BlockFactory(new TargetManager());
 
     private Text logBox;
+
+    private BlockType selectedBlockType = BlockType.EMPTY;
+    private Colour selectedColour = Colour.GREEN;
+    private ImageView selectedBlockImage;
+    private VBox blockTypeChooserNode;
 
     public void init(Stage primaryStage) throws Exception {
         primaryStage.setTitle("Colourshift solver");
@@ -103,8 +106,9 @@ public class Gui {
         grid.setVgap(10);
         grid.setPadding(new Insets(25, 25, 25, 25));
 
-        grid.add(createColourChooser(), 0, 0, 1, 3);
-        grid.add(createBlockChooser(), 1, 0, 1, 3);
+        grid.add(createColourChooserNode(), 0, 0, 1, 2);
+        grid.add(createBlockTypeChooserNode(), 1, 0, 1, 3);
+        grid.add(createSelectedBlockNode(), 0, 2, 1, 1);
         grid.add(createBoardNode(board), 2, 1);
         grid.add(createMenuNode(primaryStage, board), 2, 2);
         grid.add(createLogNode(), 2, 3);
@@ -120,7 +124,7 @@ public class Gui {
         for (int row = 0; row < board.size(); row++) {
             for (int column = 0; column < board.size(); column++) {
                 Block block = board.get(row, column);
-                Image image = imageProvider.getImage(block);
+                Image image = imageProvider.getBlockImage(block);
                 ImageView imageView = new ImageView(image);
                 boardScene.add(imageView, column, row);
                 attachClickHandler(imageView, board, row, column, imageViewTable);
@@ -134,7 +138,7 @@ public class Gui {
         for (int row = 0; row < board.size(); row++) {
             for (int column = 0; column < board.size(); column++) {
                 Block block = board.get(row, column);
-                Image newImage = imageProvider.getImage(block);
+                Image newImage = imageProvider.getBlockImage(block);
                 imageViewTable.get(row, column).setImage(newImage);
             }
         }
@@ -146,27 +150,31 @@ public class Gui {
             if (event.getButton() == MouseButton.PRIMARY) {
                 block.rotate();
             } else {
-                block = board.changeBlockType(row, column);
+                block = board.changeBlockType(row, column, selectedBlockType, selectedColour);
             }
             refreshBoardNode(board, imageViewTable);
         });
     }
 
     private Node createMenuNode(Stage primaryStage, Board board) {
-        Button menuBtn = new Button("Menu");
-        menuBtn.setOnAction((ActionEvent e) -> reset(primaryStage));
+        Button newBtn = new Button("New");
+        newBtn.setOnAction((ActionEvent e) -> reset(primaryStage));
+
+        Button loadBtn = new Button("Load");
+        loadBtn.setOnAction((ActionEvent e) -> load(primaryStage));
 
         Button saveBtn = new Button("Save");
         saveBtn.setOnAction((ActionEvent e) -> save(primaryStage, board));
 
         Button solveBtn = new Button("Solve");
 
-        menuBtn.setMaxWidth(Double.MAX_VALUE);
+        newBtn.setMaxWidth(Double.MAX_VALUE);
+        loadBtn.setMaxWidth(Double.MAX_VALUE);
         saveBtn.setMaxWidth(Double.MAX_VALUE);
         solveBtn.setMaxWidth(Double.MAX_VALUE);
 
         VBox vbBtn = new VBox();
-        vbBtn.getChildren().addAll(menuBtn, saveBtn, solveBtn);
+        vbBtn.getChildren().addAll(newBtn, saveBtn, loadBtn, solveBtn);
         return vbBtn;
     }
 
@@ -175,14 +183,7 @@ public class Gui {
     }
 
     private void save(Stage primaryStage, Board board) {
-        FileChooser fileChooser = new FileChooser();
-        FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("Board files (*.board)", "*.board");
-        fileChooser.getExtensionFilters().add(extFilter);
-        File savedDir = new File("saved");
-        if (!savedDir.exists()) {
-            savedDir.mkdirs();
-        }
-        fileChooser.setInitialDirectory(savedDir);
+        FileChooser fileChooser = createBoardFileChooser();
         File file = fileChooser.showSaveDialog(primaryStage);
         if(file != null) {
             try {
@@ -200,14 +201,7 @@ public class Gui {
     }
 
     private void load(Stage primaryStage) {
-        FileChooser fileChooser = new FileChooser();
-        FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("Board files (*.board)", "*.board");
-        fileChooser.getExtensionFilters().add(extFilter);
-        File savedDir = new File("saved");
-        if (!savedDir.exists()) {
-            savedDir.mkdirs();
-        }
-        fileChooser.setInitialDirectory(savedDir);
+        FileChooser fileChooser = createBoardFileChooser();
         File file = fileChooser.showOpenDialog(primaryStage);
         if(file != null) {
             try {
@@ -222,32 +216,79 @@ public class Gui {
         }
     }
 
+    private FileChooser createBoardFileChooser() {
+        FileChooser fileChooser = new FileChooser();
+        FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("Board files (*.board)", "*.board");
+        fileChooser.getExtensionFilters().add(extFilter);
+        File savedDir = new File("saved");
+        if (!savedDir.exists()) {
+            savedDir.mkdirs();
+        }
+        fileChooser.setInitialDirectory(savedDir);
+        return fileChooser;
+    }
+
     private Node createLogNode() {
         logBox = new Text();
         return logBox;
     }
 
-    private Node createBlockChooser() {
-        VBox vBox = new VBox();
-        for (BlockType blockType : BlockType.values()) {
-            Block block = blockFactory.createAndInitBlock(blockType, Optional.of(Colour.GREEN));
-            Image image = imageProvider.getImage(block);
-            ImageView imageView = new ImageView(image);
-            vBox.getChildren().add(imageView);
-        }
-        return vBox;
+    private Node createBlockTypeChooserNode() {
+        blockTypeChooserNode = new VBox();
+        refreshBlockTypeChooserNode();
+        return blockTypeChooserNode;
     }
 
-    private Node createColourChooser() {
+    private Node createColourChooserNode() {
         VBox vBox = new VBox();
         for (Colour colour : Colour.values()) {
             if (colour != Colour.GREY) {
                 Image image = imageProvider.getColourImage(colour);
                 ImageView imageView = new ImageView(image);
-                vBox.getChildren().add(imageView);
+                BorderPane borderPane = new BorderPane();
+                borderPane.setCenter(imageView);
+                borderPane.setMaxHeight(image.getHeight()+1);
+                borderPane.setMaxWidth(image.getWidth()+1);
+                borderPane.setStyle("-fx-content-display: top; -fx-border-insets: 1 0 0 0; -fx-border-color: black; -fx-border-width: 2");
+                imageView.setOnMouseClicked((MouseEvent e) -> {
+                    selectedColour = colour;
+                    refreshSelectedBlockNode();
+                    refreshBlockTypeChooserNode();
+                });
+                vBox.getChildren().add(borderPane);
             }
         }
         return vBox;
+    }
+
+    private Node createSelectedBlockNode() {
+        selectedBlockImage = new ImageView();
+        refreshSelectedBlockNode();
+        return selectedBlockImage;
+    }
+
+    private void refreshSelectedBlockNode() {
+        Block block = blockFactory.createAndInitBlock(selectedBlockType, Optional.of(selectedColour));
+        selectedBlockImage.setImage(imageProvider.getBlockImage(block));
+    }
+
+    private void refreshBlockTypeChooserNode() {
+        blockTypeChooserNode.getChildren().clear();
+        for (BlockType blockType : BlockType.values()) {
+            Block block = blockFactory.createAndInitBlock(blockType, Optional.of(selectedColour));
+            Image image = imageProvider.getBlockImage(block);
+            ImageView imageView = new ImageView(image);
+            BorderPane borderPane = new BorderPane();
+            borderPane.setCenter(imageView);
+            borderPane.setMaxHeight(image.getHeight()+1);
+            borderPane.setMaxWidth(image.getWidth()+1);
+            borderPane.setStyle("-fx-content-display: top; -fx-border-insets: 1 0 0 0; -fx-border-color: black; -fx-border-width: 2");
+            imageView.setOnMouseClicked((MouseEvent e) -> {
+                selectedBlockType = blockType;
+                refreshSelectedBlockNode();
+            });
+            blockTypeChooserNode.getChildren().add(borderPane);
+        }
     }
 
     private void log(String message) {

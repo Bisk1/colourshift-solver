@@ -36,7 +36,7 @@ public abstract class Source extends Block {
     }
 
 	@Override
-	public void updateReceived(Direction fromDirection, Colour colour) {
+	public void updateReceived(Direction fromDirection, Colour colour, boolean updateEagerly) {
 		
 	}
 

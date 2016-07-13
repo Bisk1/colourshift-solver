@@ -42,7 +42,7 @@ public abstract class Block implements Serializable {
 		this.borderMap = borderMap;
 	}
 
-	public abstract void updateReceived(Direction fromDirection, Colour colour);
+	public abstract void updateReceived(Direction fromDirection, Colour colour, boolean updateEagerly);
 
     public abstract void fullUpdate();
 

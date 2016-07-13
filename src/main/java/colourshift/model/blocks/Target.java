@@ -22,23 +22,23 @@ public class Target extends Block {
 	}
 	
 	@Override
-	public void updateReceived(Direction fromDirection, Colour colour) {
+	public void updateReceived(Direction fromDirection, Colour colour, boolean updateEagerly) {
         if (fromDirection == angle) {
-            power.setCurrent(colour);
+            fullUpdate();
 		}
 	}
 
 	@Override
 	public void fullUpdate() {
         Direction currentDirection = (Direction) angle;
-		Colour colour = borderMap.getColourMix(new DirectionSet(currentDirection));
-        updateReceived(currentDirection, colour);
+        Colour colour = borderMap.getIncomingColourMix(new DirectionSet(currentDirection));
+        power.setCurrent(colour);
 	}
 
 	@Override
 	public void fullClear() {
         Direction currentDirection = (Direction) angle;
-        updateReceived(currentDirection, Colour.GREY);
+        updateReceived(currentDirection, Colour.GREY, false);
 	}
 
 	public boolean isActive() {

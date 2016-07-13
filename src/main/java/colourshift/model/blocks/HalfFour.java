@@ -38,6 +38,7 @@ public class HalfFour extends TransitiveBlock {
 		switch(fromDirection) {
 			case LEFT: case RIGHT:
 				power.setHorizontal(colour);
+				break;
 			default:
 				power.setVertical(colour);
 		}

@@ -1,8 +1,8 @@
 package colourshift.model;
 
 import java.util.Iterator;
+import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Stream;
 
 import com.google.common.collect.Sets;
 
@@ -12,21 +12,19 @@ public class DirectionsDivision implements Iterable<DirectionSet> {
 	public DirectionsDivision(DirectionSet... dirsets) {
 		this.dirsets = Sets.newHashSet(dirsets);
 	}
-	
-	public DirectionsDivision(Set<DirectionSet> dirsets) {
-		this.dirsets = dirsets;
-	}
-	
-	public Set<DirectionSet> getDirsets() {
-		return dirsets;
-	}
 
 	@Override
 	public Iterator<DirectionSet> iterator() {
 		return dirsets.iterator();
 	}
-	
-	public Stream<DirectionSet> stream() {
-		return dirsets.stream();
+
+	public Optional<DirectionSet> get(Direction direction) {
+		for (DirectionSet directionSet : dirsets) {
+			if (directionSet.contains(direction)) {
+				return Optional.of(directionSet);
+			}
+		}
+        return Optional.empty();
 	}
+
 }

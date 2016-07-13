@@ -2,6 +2,7 @@ package colourshift.model.power;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 import colourshift.model.Colour;
 
@@ -21,7 +22,7 @@ public class SimplePower implements Power {
 		this.colour = colour;
 	}
 	
-	public Colour getColour(Colour colour) {
+	public Colour getColour() {
 		return colour;
 	}
 	
@@ -33,6 +34,19 @@ public class SimplePower implements Power {
 	@Override
 	public List<Colour> toColoursList() {
 		return Arrays.asList(colour);
+	}
+
+	@Override
+	public boolean equals(Object other) {
+		if (other instanceof SimplePower) {
+			return Objects.equals(colour, ((SimplePower) other).getColour());
+		}
+		return false;
+	}
+
+	@Override
+	public int hashCode() {
+		return colour.hashCode();
 	}
 
 }

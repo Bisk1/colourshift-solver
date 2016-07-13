@@ -11,6 +11,7 @@ import com.google.common.collect.Table;
 
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 
 /**
  * Base class for all blocks that after receiving colour signal will generally
@@ -49,15 +50,19 @@ public abstract class TransitiveBlock extends Block {
 		}
 		return paths;
 	}
-
 	@Override
-	public void updateReceived(Direction fromDirection, Colour colour) {
+	public void updateReceived(Direction fromDirection, Colour colour, boolean updateEagerly) {
 		Map<Direction, DirectionSet> path = paths.row(angle);
 		if (!path.containsKey(fromDirection)) {
 			return;
 		}
-		boolean powerChanged = updatePowerAndCheckIfChanged(fromDirection, colour);
-		if (!powerChanged) {
+		Optional<DirectionSet> connectedDirectionSet = getDirectionsDivisions().get(angle).get(fromDirection);
+        if (!connectedDirectionSet.isPresent()) {
+            return;
+        }
+		Colour dirsetColour = borderMap.getIncomingColourMix(connectedDirectionSet.get());
+		boolean powerChanged = updatePowerAndCheckIfChanged(fromDirection, dirsetColour);
+		if (!powerChanged || updateEagerly) {
 			return;
 		}
 		DirectionSet toDirections = path.get(fromDirection);
@@ -69,21 +74,16 @@ public abstract class TransitiveBlock extends Block {
 	private boolean updatePowerAndCheckIfChanged(Direction fromDirection, Colour colour) {
 		Power oldPower = getPower().copy();
 		updatePower(fromDirection, colour);
-		return !oldPower.equals(getPower());
+        Power newPower = getPower();
+		return !oldPower.equals(newPower);
 	}
 
     @Override
     public void fullUpdate() {
-        DirectionsDivision directionsDivision = getDirectionsDivisions().get(angle);
-        for (DirectionSet directionSet : directionsDivision) {
-            Colour fromColour = borderMap.getColourMix(directionSet);
-            Direction fromDirection = directionSet.getAny();
-            boolean powerChanged = updatePowerAndCheckIfChanged(fromDirection, fromColour);
-            if (!powerChanged) {
-                continue;
-            }
-            for (Direction toDirection : directionSet) {
-                borderMap.send(toDirection, fromColour);
+        for (Direction fromDirection : Direction.values()) {
+            if (borderMap.contains(fromDirection)) {
+                Colour incomingColour = borderMap.getIncomingColourMix(fromDirection);
+				updateReceived(fromDirection, incomingColour, true);
             }
         }
     }

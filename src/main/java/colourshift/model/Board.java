@@ -30,12 +30,10 @@ public class Board implements Serializable {
 		return blocks.columnKeySet().size();
 	}
 
-	public Block changeBlockType(int row, int column) {
+	public Block changeBlockType(int row, int column, BlockType newBlockType, Colour newColour) {
         Block oldBlock = blocks.get(row, column);
         oldBlock.fullClear();
-        BlockType oldBlockType = BlockType.fromJavaClass(oldBlock.getClass());
-        BlockType newBlockType = getNextFromList(oldBlockType, BlockType.valuesList);
-        Block newBlock = blockFactory.createAndInitBlock(newBlockType, Optional.of(Colour.GREEN));
+        Block newBlock = blockFactory.createAndInitBlock(newBlockType, Optional.of(newColour));
 
 		BorderMap borderMap = oldBlock.getBorderMap();
         borderMap.changeBlock(newBlock);

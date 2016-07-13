@@ -19,12 +19,12 @@ public class BorderView implements Serializable {
 		border.send(block, colour);
 	}
 
-	public Colour getColour() {
-		return border.getColour();
-	}
-
 	public void changeBlock(Block newBlock) {
         border.changeBlock(block, newBlock);
         block = newBlock;
+	}
+
+	public Colour getIncomingColour() {
+		return border.getIncomingColour(block);
 	}
 }

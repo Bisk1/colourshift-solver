@@ -75,7 +75,7 @@ public class ImageProvider {
         }
     }
 
-    public Image getImage(Block block) {
+    public Image getBlockImage(Block block) {
         BlockType type = BlockType.fromJavaClass(block.getClass());
         Angle angle = block.getAngle();
         List<Colour> colours = block.getPower().toColoursList();

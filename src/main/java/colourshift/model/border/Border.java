@@ -3,6 +3,7 @@ package colourshift.model.border;
 import colourshift.model.Colour;
 import colourshift.model.Direction;
 import colourshift.model.blocks.Block;
+import colourshift.model.blocks.Straight;
 import com.google.common.collect.Sets;
 
 import java.io.Serializable;
@@ -41,10 +42,6 @@ public class Border implements Serializable {
 		return block == side1.block ? side2 : side1;
 	}
 
-	private Direction neighbourDirection(Block neighbour) {
-		return neighbour == side1.block ? side1.direction : side2.direction;
-	}
-
     /**
      * There are 3 options:
      * 1) All the incoming components are already received by the other side -> ignore
@@ -56,21 +53,16 @@ public class Border implements Serializable {
 	public void send(Block fromBlock, Colour colour) {
         BorderSide incomingSide = side(fromBlock);
         BorderSide otherSide = otherSide(fromBlock);
+        Colour oldOutgoingColour = getIncomingColour(otherSide.block);
         Set<Colour.Component> incomingComponents = colour.getComponents();
         if (incomingComponents.equals(incomingSide.components)) {
             return;
         }
-        if (!incomingComponents.isEmpty() && otherSide.components.containsAll(incomingComponents)) {
-            return;
-        }
         incomingSide.components = incomingComponents;
-        otherSide.block.updateReceived(incomingSide.direction, getColour());
-	}
-
-	public Colour getColour() {
-        Set<Colour.Component> componentsSum = Sets.newHashSet(side1.components);
-        componentsSum.addAll(side2.components);
-		return Colour.fromComponents(componentsSum);
+        Colour newOutgoingColour = getIncomingColour(otherSide.block);
+        if (oldOutgoingColour != newOutgoingColour) {
+            otherSide.block.updateReceived(incomingSide.direction, Colour.fromComponents(incomingComponents), false);
+        }
 	}
 
 	public void changeBlock(Block oldBlock, Block newBlock) {
@@ -80,4 +72,9 @@ public class Border implements Serializable {
             side2.block = newBlock;
 		}
 	}
+
+    public Colour getIncomingColour(Block toBlock) {
+        BorderSide fromSide = otherSide(toBlock);
+        return Colour.fromComponents(fromSide.components);
+    }
 }
