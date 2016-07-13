@@ -8,13 +8,13 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 
 import colourshift.model.Colour;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
-
+@Component
 public class BlockFactory implements Serializable {
 
-    private ImmutableSet<BlockType> blockTypesThatRequireColour = Sets.immutableEnumSet(BlockType.TARGET, BlockType.SOURCE_ONE,
-			BlockType.SOURCE_STRAIGHT, BlockType.SOURCE_TURN, BlockType.SOURCE_THREE, BlockType.SOURCE_FOUR);
-
+	@Autowired
 	private TargetManager targetManager;
 
 	public BlockFactory(TargetManager targetManager) {
@@ -36,7 +36,6 @@ public class BlockFactory implements Serializable {
 	}
 
 	private Block createBlock(BlockType blockType, Optional<Colour> colour) {
-		Preconditions.checkArgument(colour.isPresent() || !blockTypesThatRequireColour.contains(blockType));
 		switch (blockType) {
 		case EMPTY:
 			return new Empty();

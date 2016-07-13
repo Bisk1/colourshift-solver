@@ -1,9 +1,13 @@
 package colourshift.gui;
 
+import colourshift.model.Colour;
 import colourshift.model.blocks.Block;
 import colourshift.model.Board;
 import colourshift.model.BoardFactory;
 import colourshift.model.BoardFactory.Wrap;
+import colourshift.model.blocks.BlockFactory;
+import colourshift.model.blocks.BlockType;
+import colourshift.model.blocks.TargetManager;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 import javafx.event.ActionEvent;
@@ -29,6 +33,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 @Component
 public class Gui {
@@ -38,6 +46,9 @@ public class Gui {
 
     @Autowired
     private ImageProvider imageProvider;
+
+    // I don't want Spring-container managed blockFactory
+    private BlockFactory blockFactory = new BlockFactory(new TargetManager());
 
     private Text logBox;
 
@@ -63,7 +74,6 @@ public class Gui {
         CheckBox wrapInput = new CheckBox();
         HBox wrapBox = new HBox(wrapLabel, wrapInput);
         grid.add(wrapBox, 0, 2);
-
 
         newBtn.setOnAction((ActionEvent e) -> {
                 int boardSizeInt = Integer.parseInt(sizeInput.getText());
@@ -93,9 +103,11 @@ public class Gui {
         grid.setVgap(10);
         grid.setPadding(new Insets(25, 25, 25, 25));
 
-        grid.add(createBoardNode(board), 1, 1);
-        grid.add(createMenuNode(primaryStage, board), 1, 2);
-        grid.add(createLogNode(), 1, 3);
+        grid.add(createColourChooser(), 0, 0, 1, 3);
+        grid.add(createBlockChooser(), 1, 0, 1, 3);
+        grid.add(createBoardNode(board), 2, 1);
+        grid.add(createMenuNode(primaryStage, board), 2, 2);
+        grid.add(createLogNode(), 2, 3);
 
         Scene scene = new Scene(grid);
         primaryStage.setScene(scene);
@@ -166,6 +178,11 @@ public class Gui {
         FileChooser fileChooser = new FileChooser();
         FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("Board files (*.board)", "*.board");
         fileChooser.getExtensionFilters().add(extFilter);
+        File savedDir = new File("saved");
+        if (!savedDir.exists()) {
+            savedDir.mkdirs();
+        }
+        fileChooser.setInitialDirectory(savedDir);
         File file = fileChooser.showSaveDialog(primaryStage);
         if(file != null) {
             try {
@@ -186,6 +203,11 @@ public class Gui {
         FileChooser fileChooser = new FileChooser();
         FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("Board files (*.board)", "*.board");
         fileChooser.getExtensionFilters().add(extFilter);
+        File savedDir = new File("saved");
+        if (!savedDir.exists()) {
+            savedDir.mkdirs();
+        }
+        fileChooser.setInitialDirectory(savedDir);
         File file = fileChooser.showOpenDialog(primaryStage);
         if(file != null) {
             try {
@@ -203,6 +225,29 @@ public class Gui {
     private Node createLogNode() {
         logBox = new Text();
         return logBox;
+    }
+
+    private Node createBlockChooser() {
+        VBox vBox = new VBox();
+        for (BlockType blockType : BlockType.values()) {
+            Block block = blockFactory.createAndInitBlock(blockType, Optional.of(Colour.GREEN));
+            Image image = imageProvider.getImage(block);
+            ImageView imageView = new ImageView(image);
+            vBox.getChildren().add(imageView);
+        }
+        return vBox;
+    }
+
+    private Node createColourChooser() {
+        VBox vBox = new VBox();
+        for (Colour colour : Colour.values()) {
+            if (colour != Colour.GREY) {
+                Image image = imageProvider.getColourImage(colour);
+                ImageView imageView = new ImageView(image);
+                vBox.getChildren().add(imageView);
+            }
+        }
+        return vBox;
     }
 
     private void log(String message) {

@@ -8,6 +8,7 @@ import colourshift.model.border.BorderMap;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 import com.google.common.collect.Table.Cell;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -18,10 +19,11 @@ public class BoardFactory {
         DISABLED
     }
 
+	@Autowired
 	private BlockFactory blockFactory;
 
-	public BoardFactory() {
-		this.blockFactory = new BlockFactory(new TargetManager());
+	public BoardFactory(BlockFactory blockFactory) {
+		this.blockFactory = blockFactory;
 	}
 
 	public Board createEmpty(int rows, int cols, Wrap wrap) {

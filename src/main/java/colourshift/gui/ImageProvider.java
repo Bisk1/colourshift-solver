@@ -4,6 +4,7 @@ import colourshift.model.Colour;
 import colourshift.model.angle.Angle;
 import colourshift.model.blocks.Block;
 import colourshift.model.blocks.BlockType;
+import colourshift.model.blocks.Empty;
 import com.google.common.base.Objects;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -58,8 +59,11 @@ public class ImageProvider {
 
     private static final int ORANGE_RGB = new Color(255, 128, 0).getRGB();
     private static final int PINK_RGB = new Color(255, 0, 220).getRGB();
+    private static final int BLACK_RGB = new Color(0, 0, 0).getRGB();
 
     private static Map<BlockKey, Image> blockKeyToImage = Maps.newHashMap();
+
+    private static Map<Colour, Image> colourToImage = Maps.newHashMap();
 
     /**
      * Must be called after internal graphics initialized (stage shown) and before images are requested
@@ -79,12 +83,23 @@ public class ImageProvider {
         return blockKeyToImage.get(blockKey);
     }
 
+    public Image getColourImage(Colour colour) {
+        return colourToImage.get(colour);
+    }
+
     private void loadImages() {
         String imagesRootDir = String.valueOf(ImageProvider.class.getClassLoader().getResource(BLOCKS_IMAGES_DIRECTORY));
         for (BlockType blockType : BlockType.values()) {
             String blockImagePath = imagesRootDir + File.separator + blockType.getJavaClass().getSimpleName() + IMAGE_TEMPLATE_EXTENSION;
             Image blockImage = new Image(blockImagePath);
             loadBlockImages(blockType, blockImage);
+        }
+        for (Colour colour : Colour.values()) {
+            String emptyImagePath = imagesRootDir + File.separator + Empty.class.getSimpleName() + IMAGE_TEMPLATE_EXTENSION;
+            Image emptyImageTemplate = new Image(emptyImagePath);
+            BufferedImage emptyBufferedImage = SwingFXUtils.fromFXImage(emptyImageTemplate, null);
+            BufferedImage colourBufferedImage = mask(emptyBufferedImage, BLACK_RGB, colour.getAwtColor().getRGB());
+            colourToImage.put(colour, SwingFXUtils.toFXImage(colourBufferedImage, null));
         }
 
     }
