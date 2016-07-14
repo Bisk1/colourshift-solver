@@ -72,4 +72,18 @@ public abstract class Block implements Serializable {
 	public Set<Angle> getFeasibleAngles() {
 		return feasibleAngles;
 	}
+
+	/**
+	 * Remove the angle from the set of feasible angles
+	 * and update the current angle so that it is within the
+	 * feasible angles set.
+	 *
+	 * @param angleToForbid angle to forbid
+     */
+	public void forbidAngle(Angle angleToForbid) {
+		feasibleAngles.remove(angleToForbid);
+		if (angleToForbid == angle) {
+			angle = feasibleAngles.iterator().next();
+		}
+	}
 }

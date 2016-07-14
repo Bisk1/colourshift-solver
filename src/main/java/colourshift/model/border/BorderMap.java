@@ -8,6 +8,7 @@ import com.google.common.collect.Maps;
 
 import java.io.Serializable;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class BorderMap implements Serializable {
@@ -84,6 +85,10 @@ public class BorderMap implements Serializable {
 	}
 
 	public boolean contains(Direction direction) {
-		return map.keySet().contains(direction);
+		return map.containsKey(direction);
+	}
+
+	public Optional<Block> getNeighbour(Direction direction) {
+		return map.containsKey(direction) ? Optional.of(map.get(direction).getNeighbour()) : Optional.empty();
 	}
 }

@@ -5,6 +5,7 @@ import colourshift.model.BoardFactory;
 import colourshift.model.BoardFactory.Wrap;
 import colourshift.model.Colour;
 import colourshift.model.blocks.*;
+import colourshift.solver.BoardSolver;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 import javafx.event.ActionEvent;
@@ -51,6 +52,11 @@ public class Gui {
     private Colour selectedColour = Colour.GREEN;
     private ImageView selectedBlockImage;
     private VBox blockTypeChooserNode;
+
+    /**
+     * Collection of images for all board blocks
+     */
+    private Table<Integer, Integer, ImageView> blocksImageViewsTable;
 
     public void init(Stage primaryStage) throws Exception {
         primaryStage.setTitle("Colourshift solver");
@@ -116,7 +122,7 @@ public class Gui {
     }
 
     private Node createBoardNode(Board board) {
-        Table<Integer, Integer, ImageView> imageViewTable = HashBasedTable.create();
+        blocksImageViewsTable = HashBasedTable.create();
         GridPane boardScene = new GridPane();
         for (int row = 0; row < board.size(); row++) {
             for (int column = 0; column < board.size(); column++) {
@@ -124,24 +130,24 @@ public class Gui {
                 Image image = imageProvider.getBlockImage(block);
                 ImageView imageView = new ImageView(image);
                 boardScene.add(imageView, column, row);
-                attachClickHandler(imageView, board, row, column, imageViewTable);
-                imageViewTable.put(row, column, imageView);
+                attachClickHandler(imageView, board, row, column);
+                blocksImageViewsTable.put(row, column, imageView);
             }
         }
         return boardScene;
     }
 
-    private void refreshBoardNode(Board board, Table<Integer, Integer, ImageView> imageViewTable) {
+    public void refreshBoardNode(Board board) {
         for (int row = 0; row < board.size(); row++) {
             for (int column = 0; column < board.size(); column++) {
                 Block block = board.get(row, column);
                 Image newImage = imageProvider.getBlockImage(block);
-                imageViewTable.get(row, column).setImage(newImage);
+                blocksImageViewsTable.get(row, column).setImage(newImage);
             }
         }
     }
 
-    private void attachClickHandler(ImageView imageView, Board board, int row, int column, Table<Integer, Integer, ImageView> imageViewTable) {
+    private void attachClickHandler(ImageView imageView, Board board, int row, int column) {
         imageView.setOnMouseClicked((MouseEvent event) -> {
             Block block = board.get(row, column);
             if (event.getButton() == MouseButton.PRIMARY) {
@@ -149,7 +155,7 @@ public class Gui {
             } else {
                 block = board.changeBlockType(row, column, selectedBlockType, selectedColour);
             }
-            refreshBoardNode(board, imageViewTable);
+            refreshBoardNode(board);
         });
     }
 
@@ -164,6 +170,7 @@ public class Gui {
         saveBtn.setOnAction((ActionEvent e) -> save(primaryStage, board));
 
         Button solveBtn = new Button("Solve");
+        solveBtn.setOnAction((ActionEvent e) -> solve(primaryStage, board));
 
         newBtn.setMaxWidth(Double.MAX_VALUE);
         loadBtn.setMaxWidth(Double.MAX_VALUE);
@@ -173,6 +180,11 @@ public class Gui {
         VBox vbBtn = new VBox();
         vbBtn.getChildren().addAll(newBtn, saveBtn, loadBtn, solveBtn);
         return vbBtn;
+    }
+
+    private void solve(Stage primaryStage, Board board) {
+        BoardSolver boardSolver = new BoardSolver(this, board);
+        boardSolver.run();
     }
 
     private void reset(Stage primaryStage) {

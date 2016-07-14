@@ -6,6 +6,7 @@ import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.stream.Stream;
 
 public class DirectionSet implements Iterable<Direction>, Serializable {
 
@@ -34,4 +35,7 @@ public class DirectionSet implements Iterable<Direction>, Serializable {
 		return set.contains(direction);
 	}
 
+	public Stream<Direction> stream() {
+		return set.stream();
+	}
 }

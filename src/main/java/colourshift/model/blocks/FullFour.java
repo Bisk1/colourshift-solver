@@ -25,7 +25,7 @@ public class FullFour extends TransitiveBlock {
 	}
 
 	@Override
-	protected Map<Angle, DirectionsDivision> getDirectionsDivisions() {
+	public Map<Angle, DirectionsDivision> getDirectionsDivisions() {
 		return ImmutableMap.of(Single.SINGLE, new DirectionsDivision(
 				new DirectionSet(Direction.values())));
 	}

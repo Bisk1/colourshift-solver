@@ -18,7 +18,7 @@ public abstract class Source extends Block {
 		this.power = new SourcePower(colour);
 	}
 	
-	protected abstract Map<Angle, DirectionSet> getDirectionsSets();
+	public abstract Map<Angle, DirectionSet> getDirectionsSets();
 
     public void activate() {
         Colour colour = power.getColour();

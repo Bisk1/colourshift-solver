@@ -27,7 +27,7 @@ public class HalfFour extends TransitiveBlock {
 	}
 
 	@Override
-	protected Map<Angle, DirectionsDivision> getDirectionsDivisions() {
+	public Map<Angle, DirectionsDivision> getDirectionsDivisions() {
 		return ImmutableMap.of(Single.SINGLE, new DirectionsDivision(
 						new DirectionSet(Direction.LEFT, Direction.RIGHT),
 						new DirectionSet(Direction.UP, Direction.DOWN)));

@@ -3,6 +3,7 @@ package colourshift.model;
 import java.util.Iterator;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.google.common.collect.Sets;
 
@@ -27,4 +28,9 @@ public class DirectionsDivision implements Iterable<DirectionSet> {
         return Optional.empty();
 	}
 
+	public Set<Direction> getDirections() {
+		return dirsets.stream()
+				.flatMap(DirectionSet::stream)
+				.collect(Collectors.toSet());
+	}
 }

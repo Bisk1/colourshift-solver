@@ -24,7 +24,7 @@ public class SourceStraight extends Source {
 	}
 
 	@Override
-	protected Map<Angle, DirectionSet> getDirectionsSets() {
+	public Map<Angle, DirectionSet> getDirectionsSets() {
 		return directionsSets;
 	}
 

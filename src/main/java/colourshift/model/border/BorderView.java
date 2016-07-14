@@ -31,4 +31,8 @@ public class BorderView implements Serializable {
     public void reset() {
         border.reset(block);
     }
+
+	public Block getNeighbour() {
+		return border.otherBlock(block);
+	}
 }

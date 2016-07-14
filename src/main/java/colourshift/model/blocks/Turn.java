@@ -28,7 +28,7 @@ public class Turn extends TransitiveBlock {
 	}
 
 	@Override
-	protected BiMap<Angle, DirectionsDivision> getDirectionsDivisions() {
+	public BiMap<Angle, DirectionsDivision> getDirectionsDivisions() {
 		return ImmutableBiMap.of(
 				TurnAngle.LEFT_UP, new DirectionsDivision(new DirectionSet(Direction.LEFT, Direction.UP)), 
 				TurnAngle.UP_RIGHT, new DirectionsDivision(new DirectionSet(Direction.UP, Direction.RIGHT)), 

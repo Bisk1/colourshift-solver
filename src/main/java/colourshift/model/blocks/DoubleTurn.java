@@ -23,7 +23,7 @@ public class DoubleTurn extends TransitiveBlock {
 	}
 
 	@Override
-	protected Map<Angle, DirectionsDivision> getDirectionsDivisions() {
+	public Map<Angle, DirectionsDivision> getDirectionsDivisions() {
 		return ImmutableMap.of(DoubleTurnAngle.LEFT_UP_AND_RIGHT_DOWN, new DirectionsDivision(
 						new DirectionSet(Direction.LEFT, Direction.UP),
 						new DirectionSet(Direction.RIGHT, Direction.DOWN)),

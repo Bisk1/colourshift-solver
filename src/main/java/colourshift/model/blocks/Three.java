@@ -25,7 +25,7 @@ public class Three extends TransitiveBlock {
 	}
 
 	@Override
-	protected Map<Angle, DirectionsDivision> getDirectionsDivisions() {
+	public Map<Angle, DirectionsDivision> getDirectionsDivisions() {
 		return ImmutableMap.of(
 				ThreeAngle.NOT_LEFT, new DirectionsDivision(new DirectionSet(Direction.UP, Direction.RIGHT, Direction.DOWN)), 
 				ThreeAngle.NOT_UP, new DirectionsDivision(new DirectionSet(Direction.LEFT, Direction.RIGHT, Direction.DOWN)), 

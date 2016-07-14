@@ -32,7 +32,7 @@ public abstract class TransitiveBlock extends Block {
 		this.paths = buildPaths();
 	}
 
-	abstract Map<Angle, DirectionsDivision> getDirectionsDivisions();
+	public abstract Map<Angle, DirectionsDivision> getDirectionsDivisions();
 
 	abstract void updatePower(Direction fromDirection, Colour colour);
 	

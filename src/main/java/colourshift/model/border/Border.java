@@ -14,6 +14,10 @@ public class Border implements Serializable {
 	private BorderSide side1;
     private BorderSide side2;
 
+    public Block otherBlock(Block block) {
+        return otherSide(block).block;
+    }
+
     private class BorderSide implements Serializable {
         public Direction direction;
         public Block block;
