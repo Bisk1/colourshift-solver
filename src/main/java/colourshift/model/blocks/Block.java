@@ -68,4 +68,8 @@ public abstract class Block implements Serializable {
 	public BorderMap getBorderMap() {
 		return borderMap;
 	}
+
+	public Set<Angle> getFeasibleAngles() {
+		return feasibleAngles;
+	}
 }

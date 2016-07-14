@@ -59,4 +59,18 @@ public class Board implements Serializable {
             block.resetPower();
         }
     }
+
+    /**
+     * If there are any Empty blocks instances, the board is incomplete
+     * @return
+     */
+    public boolean isComplete() {
+        return blocks.values()
+                .stream()
+                .noneMatch(e -> e instanceof Empty);
+    }
+
+    public Table<Integer, Integer, Block> getBlocks() {
+        return blocks;
+    }
 }

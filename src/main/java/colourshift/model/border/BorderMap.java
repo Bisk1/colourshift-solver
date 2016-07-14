@@ -78,4 +78,12 @@ public class BorderMap implements Serializable {
             borderView.reset();
         }
     }
+
+	public int size() {
+		return map.size();
+	}
+
+	public boolean contains(Direction direction) {
+		return map.keySet().contains(direction);
+	}
 }
