@@ -27,4 +27,8 @@ public class BorderView implements Serializable {
 	public Colour getIncomingColour() {
 		return border.getIncomingColour(block);
 	}
+
+    public void reset() {
+        border.reset(block);
+    }
 }

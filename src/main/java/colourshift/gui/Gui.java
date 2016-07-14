@@ -4,10 +4,7 @@ import colourshift.model.Board;
 import colourshift.model.BoardFactory;
 import colourshift.model.BoardFactory.Wrap;
 import colourshift.model.Colour;
-import colourshift.model.blocks.Block;
-import colourshift.model.blocks.BlockFactory;
-import colourshift.model.blocks.BlockType;
-import colourshift.model.blocks.TargetManager;
+import colourshift.model.blocks.*;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 import javafx.event.ActionEvent;
@@ -46,7 +43,7 @@ public class Gui {
     private ImageProvider imageProvider;
 
     // I don't want Spring-container managed blockFactory
-    private BlockFactory blockFactory = new BlockFactory(new TargetManager());
+    private BlockFactory blockFactory = new BlockFactory(new TargetManager(), new SourceManager());
 
     private Text logBox;
 
@@ -148,7 +145,7 @@ public class Gui {
         imageView.setOnMouseClicked((MouseEvent event) -> {
             Block block = board.get(row, column);
             if (event.getButton() == MouseButton.PRIMARY) {
-                block.rotate();
+                board.rotate(block);
             } else {
                 block = board.changeBlockType(row, column, selectedBlockType, selectedColour);
             }

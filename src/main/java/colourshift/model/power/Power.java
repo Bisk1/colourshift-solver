@@ -6,6 +6,7 @@ import java.util.List;
 import colourshift.model.Colour;
 
 public interface Power extends Serializable {
-	public Power copy();
-	public List<Colour> toColoursList();
+	Power copy();
+	List<Colour> toColoursList();
+	void reset();
 }

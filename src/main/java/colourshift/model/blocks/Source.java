@@ -20,15 +20,8 @@ public abstract class Source extends Block {
 	
 	protected abstract Map<Angle, DirectionSet> getDirectionsSets();
 
-	private void activate() {
-        send(power.getColour());
-	}
-
-    private void deactivate() {
-        send(Colour.GREY);
-    }
-
-    public void send(Colour colour) {
+    public void activate() {
+        Colour colour = power.getColour();
         DirectionSet currentDirectionSet = getDirectionsSets().get(angle);
         for (Direction toDirection : currentDirectionSet) {
             borderMap.send(toDirection, colour);
@@ -36,19 +29,9 @@ public abstract class Source extends Block {
     }
 
 	@Override
-	public void updateReceived(Direction fromDirection, Colour colour, boolean updateEagerly) {
+	public void updateReceived(Direction fromDirection, boolean updateEagerly) {
 		
 	}
-
-    @Override
-    public void fullUpdate() {
-        activate();
-    }
-
-    @Override
-    public void fullClear() {
-        deactivate();
-    }
 
 	@Override
 	public Power getPower() {

@@ -11,13 +11,9 @@ public class SimplePower implements Power {
 	private Colour colour;
 	
 	public SimplePower() {
-		this(Colour.GREY);
+        this.colour = Colour.GREY;
 	}
-	
-	public SimplePower(Colour colour) {
-		this.colour = colour;
-	}
-	
+
 	public void setColour(Colour colour) {
 		this.colour = colour;
 	}
@@ -28,9 +24,16 @@ public class SimplePower implements Power {
 	
 	@Override
 	public Power copy() {
-		return new SimplePower(colour);
+		SimplePower newPower = new SimplePower();
+        newPower.setColour(colour);
+        return newPower;
 	}
-	
+
+	@Override
+	public void reset() {
+		this.colour = Colour.GREY;
+	}
+
 	@Override
 	public List<Colour> toColoursList() {
 		return Arrays.asList(colour);

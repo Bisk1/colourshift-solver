@@ -15,6 +15,12 @@ public class DoubleTurnPower implements Power {
 	}
 
 	@Override
+	public void reset() {
+		this.left = Colour.GREY;
+		this.right = Colour.GREY;
+	}
+
+	@Override
 	public Power copy() {
 		DoubleTurnPower copy = new DoubleTurnPower();
 		copy.setLeft(left);

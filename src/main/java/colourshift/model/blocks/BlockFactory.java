@@ -17,8 +17,12 @@ public class BlockFactory implements Serializable {
 	@Autowired
 	private TargetManager targetManager;
 
-	public BlockFactory(TargetManager targetManager) {
+	@Autowired
+	private SourceManager sourceManager;
+
+	public BlockFactory(TargetManager targetManager, SourceManager sourceManager) {
 		this.targetManager = targetManager;
+        this.sourceManager = sourceManager;
 	}
 
 	public Block createEmpty() {
@@ -27,13 +31,22 @@ public class BlockFactory implements Serializable {
 
 	public Block createAndInitBlock(BlockType blockType, Optional<Colour> colour) {
 		Block block = createBlock(blockType, colour);
-		
+
 		if (block instanceof Target) {
 			targetManager.add((Target)block);
-		}
-		
+		} else if (block instanceof Source) {
+            sourceManager.add((Source) block);
+        }
 		return block;
 	}
+
+    public void deregister(Block block) {
+        if (block instanceof Target) {
+            targetManager.remove((Target)block);
+        } else if (block instanceof Source) {
+            sourceManager.remove((Source) block);
+        }
+    }
 
 	private Block createBlock(BlockType blockType, Optional<Colour> colour) {
 		switch (blockType) {
@@ -67,4 +80,5 @@ public class BlockFactory implements Serializable {
 			throw new RuntimeException("Unkown block type: " + blockType);
 		}
 	}
+
 }

@@ -73,7 +73,9 @@ public class BorderMap implements Serializable {
 				.reduce(Colour.GREY, (colour1, colour2) -> colour1.plus(colour2));
 	}
 
-    public boolean contains(Direction direction) {
-        return map.containsKey(direction);
+    public void reset(Block fromBlock) {
+        for (BorderView borderView : map.values()) {
+            borderView.reset();
+        }
     }
 }

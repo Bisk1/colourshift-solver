@@ -15,6 +15,12 @@ public class HalfFourPower implements Power {
 	}
 
 	@Override
+	public void reset() {
+		this.horizontal = Colour.GREY;
+		this.vertical = Colour.GREY;
+	}
+
+	@Override
 	public Power copy() {
 		HalfFourPower copy = new HalfFourPower();
 		copy.setHorizontal(horizontal);

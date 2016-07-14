@@ -61,7 +61,7 @@ public class Border implements Serializable {
         incomingSide.components = incomingComponents;
         Colour newOutgoingColour = getIncomingColour(otherSide.block);
         if (oldOutgoingColour != newOutgoingColour) {
-            otherSide.block.updateReceived(incomingSide.direction, Colour.fromComponents(incomingComponents), false);
+            otherSide.block.updateReceived(incomingSide.direction, false);
         }
 	}
 
@@ -76,5 +76,9 @@ public class Border implements Serializable {
     public Colour getIncomingColour(Block toBlock) {
         BorderSide fromSide = otherSide(toBlock);
         return Colour.fromComponents(fromSide.components);
+    }
+
+    public void reset(Block fromBlock) {
+        side(fromBlock).components = Sets.newHashSet();
     }
 }

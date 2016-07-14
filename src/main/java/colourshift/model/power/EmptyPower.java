@@ -14,6 +14,12 @@ public class EmptyPower implements Power {
 	public static EmptyPower getInstance() {
 		return INSTANCE;
 	}
+
+	@Override
+	public void reset() {
+
+	}
+
 	@Override
 	public Power copy() {
 		return this;

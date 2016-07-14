@@ -2,6 +2,7 @@ package colourshift.model;
 
 import colourshift.model.blocks.Block;
 import colourshift.model.blocks.BlockFactory;
+import colourshift.model.blocks.SourceManager;
 import colourshift.model.blocks.TargetManager;
 import colourshift.model.border.Border;
 import colourshift.model.border.BorderMap;
@@ -22,6 +23,12 @@ public class BoardFactory {
 	@Autowired
 	private BlockFactory blockFactory;
 
+	@Autowired
+	private SourceManager sourceManager;
+
+	@Autowired
+	private TargetManager targetManager;
+
 	public BoardFactory(BlockFactory blockFactory) {
 		this.blockFactory = blockFactory;
 	}
@@ -30,7 +37,7 @@ public class BoardFactory {
 		
 		Table<Integer, Integer, Block> blocks = createBlocks(cols, rows);
 		wireNeighbours(blocks, rows, cols, wrap);
-		return new Board(blocks, blockFactory);
+		return new Board(blocks, blockFactory, sourceManager, targetManager);
 	}
 	private Table<Integer, Integer, Block> createBlocks(int rows, int cols) {
 		Table<Integer, Integer, Block> blocks = HashBasedTable.create(rows, cols);

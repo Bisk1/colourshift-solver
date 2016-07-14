@@ -33,7 +33,11 @@ public class TargetPower implements Power {
 		newPower.setCurrent(current);
 		return newPower;
 	}
-	
+
+	public void reset() {
+		this.current = Colour.GREY;
+	}
+
 	@Override
 	public List<Colour> toColoursList() {
 		return Arrays.asList(required, current);

@@ -42,22 +42,21 @@ public abstract class Block implements Serializable {
 		this.borderMap = borderMap;
 	}
 
-	public abstract void updateReceived(Direction fromDirection, Colour colour, boolean updateEagerly);
+	public abstract void updateReceived(Direction fromDirection, boolean updateEagerly);
 
-    public abstract void fullUpdate();
-
-    public abstract void fullClear();
+    public void resetPower() {
+        getPower().reset();
+        borderMap.reset(this);
+    }
 
 	public boolean isFixed() {
 		return feasibleAngles.size() == 1;
 	}
 
 	public void rotate() {
-        fullClear();
 		if (!isFixed()) {
 			angle = IterationUtils.getNextFromListIfInSet(angle, initialAngles, feasibleAngles);
 		}
-        fullUpdate();
 	}
 	
 	public Angle getAngle() {

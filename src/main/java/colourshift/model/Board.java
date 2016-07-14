@@ -1,45 +1,62 @@
 package colourshift.model;
 
-import colourshift.model.Colour;
-import colourshift.model.blocks.Block;
-import colourshift.model.blocks.BlockFactory;
-import colourshift.model.blocks.BlockType;
+import colourshift.model.blocks.*;
 import colourshift.model.border.BorderMap;
 import com.google.common.collect.Table;
 
 import java.io.Serializable;
 import java.util.Optional;
 
-import static colourshift.util.IterationUtils.getNextFromList;
-
 public class Board implements Serializable {
 
-	private Table<Integer, Integer, Block> blocks;
-	private BlockFactory blockFactory;
+    private Table<Integer, Integer, Block> blocks;
+    private BlockFactory blockFactory;
+    private SourceManager sourceManager;
+    private TargetManager targetManager;
 
-	public Board(Table<Integer, Integer, Block> blocks, BlockFactory blockFactory) {
-		this.blocks = blocks;
-		this.blockFactory = blockFactory;
-	}
+    public Board(Table<Integer, Integer, Block> blocks, BlockFactory blockFactory, SourceManager sourceManager, TargetManager targetManager) {
+        this.blocks = blocks;
+        this.blockFactory = blockFactory;
+        this.sourceManager = sourceManager;
+        this.targetManager = targetManager;
+    }
 
-	public Block get(int row, int column) {
+    public Block get(int row, int column) {
         return blocks.get(row, column);
     }
 
-	public int size() {
-		return blocks.columnKeySet().size();
-	}
+    public int size() {
+        return blocks.columnKeySet().size();
+    }
 
-	public Block changeBlockType(int row, int column, BlockType newBlockType, Colour newColour) {
+    public void rotate(Block block) {
+        block.rotate();
+        refreshPower();
+    }
+
+    public Block changeBlockType(int row, int column, BlockType newBlockType, Colour newColour) {
         Block oldBlock = blocks.get(row, column);
-        oldBlock.fullClear();
+        blockFactory.deregister(oldBlock);
+
         Block newBlock = blockFactory.createAndInitBlock(newBlockType, Optional.of(newColour));
 
-		BorderMap borderMap = oldBlock.getBorderMap();
+        BorderMap borderMap = oldBlock.getBorderMap();
         borderMap.changeBlock(newBlock);
         newBlock.setBorderMap(borderMap);
         blocks.put(row, column, newBlock);
-        newBlock.fullUpdate();
+
+        refreshPower();
         return newBlock;
-	}
+    }
+
+    public void refreshPower() {
+        resetPower();
+        sourceManager.activateAll();
+    }
+
+    public void resetPower() {
+        for (Block block : blocks.values()) {
+            block.resetPower();
+        }
+    }
 }

@@ -50,8 +50,9 @@ public abstract class TransitiveBlock extends Block {
 		}
 		return paths;
 	}
+
 	@Override
-	public void updateReceived(Direction fromDirection, Colour colour, boolean updateEagerly) {
+	public void updateReceived(Direction fromDirection, boolean updateEagerly) {
 		Map<Direction, DirectionSet> path = paths.row(angle);
 		if (!path.containsKey(fromDirection)) {
 			return;
@@ -79,22 +80,5 @@ public abstract class TransitiveBlock extends Block {
         Power newPower = getPower();
 		return !oldPower.equals(newPower);
 	}
-
-    @Override
-    public void fullUpdate() {
-        for (Direction fromDirection : Direction.values()) {
-            if (borderMap.contains(fromDirection)) {
-                Colour incomingColour = borderMap.getIncomingColourMix(fromDirection);
-				updateReceived(fromDirection, incomingColour, true);
-            }
-        }
-    }
-
-    @Override
-    public void fullClear() {
-        for (Direction direction : Direction.values()) {
-            borderMap.send(direction, Colour.GREY);
-        }
-    }
 
 }

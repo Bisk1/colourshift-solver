@@ -22,6 +22,9 @@ public class SourcePower implements Power {
 		return new SourcePower(colour);
 	}
 
+	public void reset() {
+	}
+
 	@Override
 	public List<Colour> toColoursList() {
 		return Arrays.asList(colour);

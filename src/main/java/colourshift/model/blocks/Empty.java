@@ -13,18 +13,8 @@ import colourshift.model.power.EmptyPower;
 public class Empty extends Block {
 
 	@Override
-	public void updateReceived(Direction fromDirection, Colour colour, boolean updateEagerly) {
+	public void updateReceived(Direction fromDirection, boolean updateEagerly) {
 		
-	}
-
-	@Override
-	public void fullUpdate() {
-
-	}
-
-	@Override
-	public void fullClear() {
-
 	}
 
 	@Override
