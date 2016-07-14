@@ -62,12 +62,14 @@ public abstract class TransitiveBlock extends Block {
         }
 		Colour dirsetColour = borderMap.getIncomingColourMix(connectedDirectionSet.get());
 		boolean powerChanged = updatePowerAndCheckIfChanged(fromDirection, dirsetColour);
-		if (!powerChanged || updateEagerly) {
+		if (!powerChanged && !updateEagerly) {
 			return;
 		}
 		DirectionSet toDirections = path.get(fromDirection);
 		for (Direction toDirection : toDirections) {
-			borderMap.send(toDirection, colour);
+            DirectionSet otherDirsSet = connectedDirectionSet.get().minus(toDirection);
+            Colour otherDirsColour = borderMap.getIncomingColourMix(otherDirsSet);
+			borderMap.send(toDirection, otherDirsColour);
 		}
 	}
 
