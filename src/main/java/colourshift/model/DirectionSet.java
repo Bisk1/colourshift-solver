@@ -1,12 +1,11 @@
 package colourshift.model;
 
+import com.google.common.collect.Sets;
+
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
-import java.util.stream.Stream;
-
-import com.google.common.collect.Sets;
 
 public class DirectionSet implements Iterable<Direction>, Serializable {
 
@@ -24,15 +23,7 @@ public class DirectionSet implements Iterable<Direction>, Serializable {
 	public Iterator<Direction> iterator() {
 		return set.iterator();
 	}
-	
-	public Stream<Direction> stream() {
-		return set.stream();
-	}
-	
-	public Set<Direction> toSet() {
-		return set;
-	}
-	
+
 	public DirectionSet minus(Direction direction) {
 		Set<Direction> difference = new HashSet<>(set);
 		difference.remove(direction);
@@ -43,7 +34,4 @@ public class DirectionSet implements Iterable<Direction>, Serializable {
 		return set.contains(direction);
 	}
 
-	public Direction getAny() {
-		return set.iterator().next();
-	}
 }
