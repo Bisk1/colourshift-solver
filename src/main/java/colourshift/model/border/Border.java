@@ -3,6 +3,7 @@ package colourshift.model.border;
 import colourshift.model.Colour;
 import colourshift.model.Direction;
 import colourshift.model.blocks.Block;
+import colourshift.model.blocks.BorderStatus;
 import colourshift.model.blocks.Straight;
 import com.google.common.collect.Sets;
 
@@ -11,8 +12,10 @@ import java.util.Set;
 
 public class Border implements Serializable {
 
-	private BorderSide side1;
+    private BorderSide side1;
     private BorderSide side2;
+    private BorderStatus status;
+
 
     public Block otherBlock(Block block) {
         return otherSide(block).block;
@@ -32,6 +35,7 @@ public class Border implements Serializable {
 	public Border(Block neighbour1, Direction direction1, Block neighbour2) {
 		this.side1 = new BorderSide(direction1, neighbour1);
         this.side2 = new BorderSide(direction1.opposite(), neighbour2);
+        this.status = BorderStatus.UNKNOWN;
 	}
 
 	public BorderView getView(Block block) {
@@ -84,5 +88,15 @@ public class Border implements Serializable {
 
     public void reset(Block fromBlock) {
         side(fromBlock).components = Sets.newHashSet();
+    }
+
+
+
+    public void unused() {
+        status = BorderStatus.UNUSED;
+    }
+
+    public BorderStatus getStatus() {
+        return status;
     }
 }

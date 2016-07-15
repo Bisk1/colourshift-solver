@@ -3,6 +3,7 @@ package colourshift.model.blocks;
 import colourshift.model.Colour;
 import colourshift.model.Direction;
 import colourshift.model.DirectionSet;
+import colourshift.model.SingleDirectionsDivision;
 import colourshift.model.angle.Angle;
 import colourshift.model.power.Power;
 import colourshift.model.power.SourcePower;
@@ -17,12 +18,12 @@ public abstract class Source extends Block {
 		super();
 		this.power = new SourcePower(colour);
 	}
-	
-	public abstract Map<Angle, DirectionSet> getDirectionsSets();
+
+	public abstract Map<Angle, SingleDirectionsDivision> getDirectionsDivisions();
 
     public void activate() {
         Colour colour = power.getColour();
-        DirectionSet currentDirectionSet = getDirectionsSets().get(angle);
+        DirectionSet currentDirectionSet = getDirectionsDivisions().get(angle).getDirectionSet();
         for (Direction toDirection : currentDirectionSet) {
             borderMap.send(toDirection, colour);
         }

@@ -18,15 +18,4 @@ public class SourceSolver extends BlockSolver {
         super(block);
         this.block = block;
     }
-
-    @Override
-    protected void reduceAnglesForUnusedBorder(Direction unusedDirection) {
-        List<Angle> feasibleAngles = Lists.newArrayList(block.getFeasibleAngles());
-        for (Angle angle : feasibleAngles) {
-            DirectionSet directionSet = block.getDirectionsSets().get(angle);
-            if (directionSet.contains(unusedDirection)) {
-                block.forbidAngle(angle);
-            }
-        }
-    }
 }

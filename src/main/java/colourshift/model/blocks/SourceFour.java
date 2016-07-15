@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import colourshift.model.SingleDirectionsDivision;
 import com.google.common.collect.ImmutableMap;
 
 import colourshift.model.Colour;
@@ -15,8 +16,8 @@ import colourshift.model.angle.TurnAngle;
 
 public class SourceFour extends Source {
 	
-	private static Map<Angle, DirectionSet> directionsSets = ImmutableMap.of(
-			Single.SINGLE, new DirectionSet(Direction.values())
+	private static Map<Angle, SingleDirectionsDivision> directionsDivisionMap = ImmutableMap.of(
+			Single.SINGLE, new SingleDirectionsDivision(Direction.values())
 			);
 
 	public SourceFour(Colour colour) {
@@ -24,8 +25,8 @@ public class SourceFour extends Source {
 	}
 
 	@Override
-	public Map<Angle, DirectionSet> getDirectionsSets() {
-		return directionsSets;
+	public Map<Angle, SingleDirectionsDivision> getDirectionsDivisions() {
+		return directionsDivisionMap;
 	}
 
 }

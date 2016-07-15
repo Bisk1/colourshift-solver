@@ -2,14 +2,17 @@ package colourshift.model.blocks;
 
 import colourshift.model.Colour;
 import colourshift.model.Direction;
+import colourshift.model.DirectionsDivision;
 import colourshift.model.angle.Angle;
 import colourshift.model.border.BorderMap;
 import colourshift.model.power.Power;
+import colourshift.solver.BlockSolver;
 import colourshift.util.IterationUtils;
 import com.google.common.collect.Sets;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public abstract class Block implements Serializable {
@@ -24,7 +27,7 @@ public abstract class Block implements Serializable {
 	 */
 	protected BorderMap borderMap;
 	/**
-	 * All angles that are feasible for specific block type. This list defines also order of rotating.
+	 * All angles that are feasible for specific block type. This list also defines order of rotating.
 	 */
 	private List<? extends Angle> initialAngles;
 	/**
@@ -32,10 +35,13 @@ public abstract class Block implements Serializable {
 	 */
 	private Set<Angle> feasibleAngles;
 
+    private BlockSolver blockSolver;
+
 	public Block() {
 		this.initialAngles = BlockType.fromJavaClass(this.getClass()).getInitialAngles();
 		this.feasibleAngles = Sets.newHashSet(initialAngles);
 		this.angle = initialAngles.get(0);
+        this.blockSolver = BlockSolver.create(this);
 	}
 
 	public void setBorderMap(BorderMap borderMap) {
@@ -86,4 +92,16 @@ public abstract class Block implements Serializable {
 			angle = feasibleAngles.iterator().next();
 		}
 	}
+
+    public void forbidAngles(Set<Angle> anglesToForbid) {
+        for (Angle angleToForbid : anglesToForbid) {
+            forbidAngle(angleToForbid);
+        }
+    }
+
+	public abstract Map<Angle, ? extends DirectionsDivision> getDirectionsDivisions();
+
+    public BlockSolver getSolver() {
+        return blockSolver;
+    }
 }

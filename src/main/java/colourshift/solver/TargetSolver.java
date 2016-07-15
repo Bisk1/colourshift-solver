@@ -15,15 +15,6 @@ public class TargetSolver extends BlockSolver {
     }
 
     @Override
-    protected void reduceAnglesForEdgeBlock() {
-        for (Direction direction : Direction.values()) {
-            if (!block.getBorderMap().contains(direction)) {
-                reduceAnglesForUnusedBorder(direction);
-            }
-        }
-    }
-
-    @Override
     public void applyInitialRules() {
         super.applyInitialRules();
         reduceAnglesForTargetNeighbours();
@@ -33,13 +24,8 @@ public class TargetSolver extends BlockSolver {
         for (Direction direction : Direction.values()) {
             Optional<Block> neighbour = block.getBorderMap().getNeighbour(direction);
             if (neighbour.isPresent() && neighbour.get() instanceof Target) {
-                reduceAnglesForUnusedBorder(direction);
+                block.forbidAngles(findAnglesUsedByDirection(direction));
             }
         }
-    }
-
-    @Override
-    protected void reduceAnglesForUnusedBorder(Direction unusedDirection) {
-        block.forbidAngle(unusedDirection);
     }
 }
