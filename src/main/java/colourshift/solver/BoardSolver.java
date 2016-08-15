@@ -2,12 +2,7 @@ package colourshift.solver;
 
 import colourshift.gui.Gui;
 import colourshift.model.Board;
-import colourshift.model.Direction;
-import colourshift.model.angle.Angle;
 import colourshift.model.blocks.Block;
-import com.google.common.collect.Sets;
-
-import java.util.Set;
 
 public class BoardSolver {
     private Gui gui;

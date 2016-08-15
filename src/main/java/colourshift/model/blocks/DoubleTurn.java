@@ -1,15 +1,8 @@
 package colourshift.model.blocks;
 
-import java.util.Map;
-
-import colourshift.model.angle.DoubleTurnAngle;
-import com.google.common.collect.ImmutableMap;
-
 import colourshift.model.Colour;
 import colourshift.model.Direction;
-import colourshift.model.DirectionSet;
-import colourshift.model.DirectionsDivision;
-import colourshift.model.angle.Angle;
+import colourshift.model.angle.DoubleTurnAngle;
 import colourshift.model.power.DoubleTurnPower;
 import colourshift.model.power.Power;
 

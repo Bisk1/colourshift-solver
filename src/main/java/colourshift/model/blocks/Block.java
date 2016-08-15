@@ -1,6 +1,5 @@
 package colourshift.model.blocks;
 
-import colourshift.model.Colour;
 import colourshift.model.Direction;
 import colourshift.model.DirectionsDivision;
 import colourshift.model.angle.Angle;
@@ -8,7 +7,6 @@ import colourshift.model.border.BorderMap;
 import colourshift.model.power.Power;
 import colourshift.solver.BlockSolver;
 import colourshift.util.IterationUtils;
-import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.Sets;
 

@@ -1,15 +1,11 @@
 package colourshift.model.blocks;
 
-import java.io.Serializable;
-import java.util.Optional;
-
-import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Sets;
-
 import colourshift.model.Colour;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.io.Serializable;
+import java.util.Optional;
 
 @Component
 public class BlockFactory implements Serializable {

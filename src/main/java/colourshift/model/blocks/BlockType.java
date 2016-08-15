@@ -5,10 +5,8 @@ import colourshift.model.DirectionSet;
 import colourshift.model.DirectionsDivision;
 import colourshift.model.angle.*;
 import com.google.common.collect.ImmutableBiMap;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;

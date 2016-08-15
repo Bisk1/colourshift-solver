@@ -1,11 +1,11 @@
 package colourshift.model;
 
+import com.google.common.collect.Sets;
+
 import java.util.Iterator;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import com.google.common.collect.Sets;
 
 public class DirectionsDivision implements Iterable<DirectionSet> {
 	private Set<DirectionSet> dirsets;

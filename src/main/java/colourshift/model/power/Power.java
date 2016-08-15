@@ -1,9 +1,9 @@
 package colourshift.model.power;
 
+import colourshift.model.Colour;
+
 import java.io.Serializable;
 import java.util.List;
-
-import colourshift.model.Colour;
 
 public interface Power extends Serializable {
 	Power copy();

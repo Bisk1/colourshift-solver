@@ -4,7 +4,6 @@ import colourshift.model.blocks.Block;
 import colourshift.model.blocks.BlockFactory;
 import colourshift.model.blocks.SourceManager;
 import colourshift.model.blocks.TargetManager;
-import colourshift.model.border.Border;
 import colourshift.model.border.BorderMap;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;

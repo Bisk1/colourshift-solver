@@ -1,9 +1,9 @@
 package colourshift.model.power;
 
+import colourshift.model.Colour;
+
 import java.util.Arrays;
 import java.util.List;
-
-import colourshift.model.Colour;
 
 public class DoubleTurnPower implements Power {
 	private Colour left;
