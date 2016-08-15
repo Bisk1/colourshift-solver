@@ -28,15 +28,6 @@ public class Turn extends TransitiveBlock {
 	}
 
 	@Override
-	public BiMap<Angle, DirectionsDivision> getDirectionsDivisions() {
-		return ImmutableBiMap.of(
-				TurnAngle.LEFT_UP, new DirectionsDivision(new DirectionSet(Direction.LEFT, Direction.UP)), 
-				TurnAngle.UP_RIGHT, new DirectionsDivision(new DirectionSet(Direction.UP, Direction.RIGHT)), 
-				TurnAngle.RIGHT_DOWN, new DirectionsDivision(new DirectionSet(Direction.RIGHT, Direction.DOWN)), 
-				TurnAngle.LEFT_DOWN, new DirectionsDivision(new DirectionSet(Direction.LEFT, Direction.DOWN)));
-	}
-
-	@Override
 	void updatePower(Direction fromDirection, Colour colour) {
 		power.setColour(colour);
 	}

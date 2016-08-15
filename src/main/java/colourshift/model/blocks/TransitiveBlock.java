@@ -15,7 +15,7 @@ import java.util.Optional;
 
 /**
  * Base class for all blocks that after receiving colour signal will generally
- * send them to other blocks.
+ * sendColour them to other blocks.
  */
 public abstract class TransitiveBlock extends Block {
 
@@ -50,7 +50,7 @@ public abstract class TransitiveBlock extends Block {
 	}
 
 	@Override
-	public void updateReceived(Direction fromDirection, boolean updateEagerly) {
+	public void colourUpdateReceived(Direction fromDirection, boolean updateEagerly) {
 		Map<Direction, DirectionSet> path = paths.row(angle);
 		if (!path.containsKey(fromDirection)) {
 			return;

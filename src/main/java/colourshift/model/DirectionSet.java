@@ -38,4 +38,8 @@ public class DirectionSet implements Iterable<Direction>, Serializable {
 	public Stream<Direction> stream() {
 		return set.stream();
 	}
+
+	public Set<Direction> getSet() {
+		return set;
+	}
 }

@@ -24,8 +24,12 @@ public class BorderMap implements Serializable {
 			this.borderMap = Maps.newHashMap();
 		}
 
-		public void setBorder(Direction direction, Border borderView) {
-			borderMap.put(direction, borderView);
+		public void createAndSetBorder(Direction direction, Block directionBlock, Block oppositeBlock) {
+			setBorder(direction, new Border(directionBlock, direction, oppositeBlock));
+		}
+
+		public void setBorder(Direction direction, Border border) {
+			borderMap.put(direction, border);
 		}
 		
 		public Border getBorder(Direction direction) {
@@ -48,7 +52,7 @@ public class BorderMap implements Serializable {
 
 	public void send(Direction toDirection, Colour colour) {
 		if (map.containsKey(toDirection)) {
-			map.get(toDirection).send(colour);
+			map.get(toDirection).sendColour(colour);
 		}
 	}
 
@@ -92,7 +96,11 @@ public class BorderMap implements Serializable {
 	}
 
 	public Optional<Block> getNeighbour(Direction direction) {
-		return map.containsKey(direction) ? Optional.of(map.get(direction).getNeighbour()) : Optional.empty();
+		return getBorderView(direction).map(BorderView::getNeighbour);
+	}
+
+	public Optional<BorderView> getBorderView(Direction direction) {
+		return map.containsKey(direction) ? Optional.of(map.get(direction)) : Optional.empty();
 	}
 
 	public void borderUnused(Direction direction) {

@@ -25,12 +25,6 @@ public class FullFour extends TransitiveBlock {
 	}
 
 	@Override
-	public Map<Angle, DirectionsDivision> getDirectionsDivisions() {
-		return ImmutableMap.of(Single.SINGLE, new DirectionsDivision(
-				new DirectionSet(Direction.values())));
-	}
-
-	@Override
 	void updatePower(Direction fromDirection, Colour colour) {
 		power.setColour(colour);
 	}

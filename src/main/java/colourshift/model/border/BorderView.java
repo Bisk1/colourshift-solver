@@ -2,7 +2,6 @@ package colourshift.model.border;
 
 import colourshift.model.Colour;
 import colourshift.model.blocks.Block;
-import colourshift.model.blocks.BorderStatus;
 
 import java.io.Serializable;
 
@@ -16,8 +15,8 @@ public class BorderView implements Serializable {
 		this.block = block;
 	}
 	
-	public void send(Colour colour) {
-		border.send(block, colour);
+	public void sendColour(Colour colour) {
+		border.sendColour(block, colour);
 	}
 
 	public void changeBlock(Block newBlock) {
@@ -37,11 +36,11 @@ public class BorderView implements Serializable {
 		return border.otherBlock(block);
 	}
 
-	public void unused() {
-		border.unused();
+	public void updateBorderStatus(BorderStatus borderStatus) {
+		border.updateBorderStatus(block, borderStatus);
 	}
 
-	public BorderStatus getStatus() {
-		return border.getStatus();
+	public BorderStatus getBorderStatus() {
+		return border.getBorderStatus();
 	}
 }

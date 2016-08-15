@@ -65,13 +65,13 @@ public class BoardFactory {
                 Block leftBlock = isLeftmostBlock ?
                         blocks.get(cell.getRowKey(), cols - 1) :
                         blocks.get(cell.getRowKey(), cell.getColumnKey() - 1);
-                builder.setBorder(Direction.LEFT, new Border(leftBlock, Direction.LEFT, cell.getValue()));
+                builder.createAndSetBorder(Direction.LEFT, leftBlock, cell.getValue());
             }
             if (!isUpmostBlock || wrap == Wrap.ENABLED) {
                 Block upBlock = isUpmostBlock ?
                         blocks.get(rows - 1, cell.getColumnKey()) :
                         blocks.get(cell.getRowKey() - 1, cell.getColumnKey());
-                builder.setBorder(Direction.UP, new Border(upBlock, Direction.UP, cell.getValue()));
+                builder.createAndSetBorder(Direction.UP, upBlock, cell.getValue());
             }
         }
 		/**

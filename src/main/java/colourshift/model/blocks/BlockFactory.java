@@ -77,7 +77,7 @@ public class BlockFactory implements Serializable {
 		case SOURCE_FOUR:
 			return new SourceFour(colour.get());
 		default:
-			throw new RuntimeException("Unkown block type: " + blockType);
+			throw new RuntimeException("Unknown block type: " + blockType);
 		}
 	}
 

@@ -27,13 +27,6 @@ public class HalfFour extends TransitiveBlock {
 	}
 
 	@Override
-	public Map<Angle, DirectionsDivision> getDirectionsDivisions() {
-		return ImmutableMap.of(Single.SINGLE, new DirectionsDivision(
-						new DirectionSet(Direction.LEFT, Direction.RIGHT),
-						new DirectionSet(Direction.UP, Direction.DOWN)));
-	}
-
-	@Override
 	void updatePower(Direction fromDirection, Colour colour) {
 		switch(fromDirection) {
 			case LEFT: case RIGHT:

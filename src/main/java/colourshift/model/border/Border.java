@@ -3,8 +3,6 @@ package colourshift.model.border;
 import colourshift.model.Colour;
 import colourshift.model.Direction;
 import colourshift.model.blocks.Block;
-import colourshift.model.blocks.BorderStatus;
-import colourshift.model.blocks.Straight;
 import com.google.common.collect.Sets;
 
 import java.io.Serializable;
@@ -12,10 +10,9 @@ import java.util.Set;
 
 public class Border implements Serializable {
 
-    private BorderSide side1;
+	private BorderSide side1;
     private BorderSide side2;
-    private BorderStatus status;
-
+    private BorderStatus borderStatus = BorderStatus.UNKNOWN;
 
     public Block otherBlock(Block block) {
         return otherSide(block).block;
@@ -35,7 +32,6 @@ public class Border implements Serializable {
 	public Border(Block neighbour1, Direction direction1, Block neighbour2) {
 		this.side1 = new BorderSide(direction1, neighbour1);
         this.side2 = new BorderSide(direction1.opposite(), neighbour2);
-        this.status = BorderStatus.UNKNOWN;
 	}
 
 	public BorderView getView(Block block) {
@@ -58,7 +54,7 @@ public class Border implements Serializable {
      * @param fromBlock
      * @param colour
      */
-	public void send(Block fromBlock, Colour colour) {
+	public void sendColour(Block fromBlock, Colour colour) {
         BorderSide incomingSide = side(fromBlock);
         BorderSide otherSide = otherSide(fromBlock);
         Colour oldOutgoingColour = getIncomingColour(otherSide.block);
@@ -69,7 +65,7 @@ public class Border implements Serializable {
         incomingSide.components = incomingComponents;
         Colour newOutgoingColour = getIncomingColour(otherSide.block);
         if (oldOutgoingColour != newOutgoingColour) {
-            otherSide.block.updateReceived(incomingSide.direction, false);
+            otherSide.block.colourUpdateReceived(incomingSide.direction, false);
         }
 	}
 
@@ -90,13 +86,15 @@ public class Border implements Serializable {
         side(fromBlock).components = Sets.newHashSet();
     }
 
-
-
-    public void unused() {
-        status = BorderStatus.UNUSED;
+    public void updateBorderStatus(Block fromBlock, BorderStatus newBorderStatus) {
+        if (this.borderStatus != newBorderStatus) {
+            this.borderStatus = newBorderStatus;
+            otherBlock(fromBlock).statusUpdateReceived();
+        }
     }
 
-    public BorderStatus getStatus() {
-        return status;
+    public BorderStatus getBorderStatus() {
+        return borderStatus;
     }
+
 }

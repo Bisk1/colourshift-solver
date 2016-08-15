@@ -25,13 +25,6 @@ public class Straight extends TransitiveBlock {
 	}
 
 	@Override
-	public Map<Angle, DirectionsDivision> getDirectionsDivisions() {
-		return ImmutableMap.of(
-				Orientation.HORIZONTAL, new DirectionsDivision(new DirectionSet(Direction.LEFT, Direction.RIGHT)), 
-				Orientation.VERTICAL, new DirectionsDivision(new DirectionSet(Direction.UP, Direction.DOWN)));
-	}
-
-	@Override
 	void updatePower(Direction fromDirection, Colour colour) {
 		power.setColour(colour);
 	}
