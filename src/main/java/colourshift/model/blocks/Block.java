@@ -14,7 +14,6 @@ import com.google.common.collect.Sets;
 
 import java.io.Serializable;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 public abstract class Block implements Serializable {

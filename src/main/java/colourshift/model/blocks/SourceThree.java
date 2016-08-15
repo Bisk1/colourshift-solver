@@ -4,7 +4,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import colourshift.model.SingleDirectionsDivision;
 import com.google.common.collect.ImmutableMap;
 
 import colourshift.model.Colour;
@@ -16,11 +15,11 @@ import colourshift.model.angle.TurnAngle;
 
 public class SourceThree extends Source {
 	
-	private static Map<Angle, SingleDirectionsDivision> directionsDivisionMap = ImmutableMap.of(
-			ThreeAngle.NOT_LEFT, new SingleDirectionsDivision(Direction.DOWN, Direction.UP, Direction.RIGHT),
-			ThreeAngle.NOT_UP, new SingleDirectionsDivision(Direction.LEFT, Direction.DOWN, Direction.RIGHT),
-			ThreeAngle.NOT_RIGHT, new SingleDirectionsDivision(Direction.LEFT, Direction.UP, Direction.DOWN),
-			ThreeAngle.NOT_DOWN, new SingleDirectionsDivision(Direction.LEFT, Direction.UP, Direction.RIGHT)
+	private static Map<Angle, DirectionSet> directionsSets = ImmutableMap.of(
+			ThreeAngle.NOT_LEFT, new DirectionSet(Direction.DOWN, Direction.UP, Direction.RIGHT),
+			ThreeAngle.NOT_UP, new DirectionSet(Direction.LEFT, Direction.DOWN, Direction.RIGHT),
+			ThreeAngle.NOT_RIGHT, new DirectionSet(Direction.LEFT, Direction.UP, Direction.DOWN),
+			ThreeAngle.NOT_DOWN, new DirectionSet(Direction.LEFT, Direction.UP, Direction.RIGHT)
 			);
 
 	public SourceThree(Colour colour) {
@@ -28,8 +27,8 @@ public class SourceThree extends Source {
 	}
 
 	@Override
-	public Map<Angle, SingleDirectionsDivision> getDirectionsDivisions() {
-		return directionsDivisionMap;
+	public Map<Angle, DirectionSet> getDirectionsSets() {
+		return directionsSets;
 	}
 
 }

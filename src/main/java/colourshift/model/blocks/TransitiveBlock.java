@@ -36,7 +36,7 @@ public abstract class TransitiveBlock extends Block {
 	
 	private Table<Angle, Direction, DirectionSet> buildPaths() {
 		Table<Angle, Direction, DirectionSet> paths = HashBasedTable.create();
-		for (Entry<Angle, ? extends DirectionsDivision> angleToDirDivision : getDirectionsDivisions().entrySet()) {
+		for (Entry<Angle, DirectionsDivision> angleToDirDivision : getDirectionsDivisions().entrySet()) {
 			Angle angle = angleToDirDivision.getKey();
 			for (DirectionSet dirset : angleToDirDivision.getValue()) {
 				for (Direction fromDirection : dirset) {

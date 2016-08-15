@@ -42,7 +42,6 @@ public class TargetSolver extends BlockSolver {
         }
     }
 
-
     @Override
     protected Set<Direction> findUnusedDirections() {
         Set<Direction> unusedDirections = new HashSet<>(Arrays.asList(Direction.values()));

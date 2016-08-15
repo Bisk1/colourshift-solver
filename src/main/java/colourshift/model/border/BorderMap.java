@@ -4,14 +4,11 @@ import colourshift.model.Colour;
 import colourshift.model.Direction;
 import colourshift.model.DirectionSet;
 import colourshift.model.blocks.Block;
-import colourshift.model.blocks.BorderStatus;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 
 import java.io.Serializable;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 public class BorderMap implements Serializable {
@@ -102,30 +99,4 @@ public class BorderMap implements Serializable {
 	public Optional<BorderView> getBorderView(Direction direction) {
 		return map.containsKey(direction) ? Optional.of(map.get(direction)) : Optional.empty();
 	}
-
-	public void borderUnused(Direction direction) {
-        if (map.containsKey(direction)) {
-            map.get(direction).unused();
-        }
-	}
-
-    public Set<Direction> findDirectionsWithStatus(BorderStatus borderStatus) {
-        Set<Direction> foundDirections =
-                map.entrySet()
-                .stream()
-                .filter(e -> e.getValue().getStatus() == borderStatus)
-                .map(Map.Entry::getKey)
-                .collect(Collectors.toSet());
-        // Special case for UNUSED: non-existing borders (edge) map to UNUSED
-        if (borderStatus == BorderStatus.UNUSED) {
-            Set<Direction> missingDirections = Sets.newHashSet(Direction.values());
-            for (Direction direction : Direction.values()) {
-                if (map.containsKey(direction)) {
-                    missingDirections.remove(direction);
-                }
-            }
-            foundDirections.addAll(missingDirections);
-        }
-        return foundDirections;
-    }
 }
