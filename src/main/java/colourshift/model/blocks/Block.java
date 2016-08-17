@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Set;
 
 public abstract class Block implements Serializable {
+	private static long serialVersionUID = 0L;
 
 	/**
 	 * Angle can be modified by rotating the block.
@@ -50,7 +51,7 @@ public abstract class Block implements Serializable {
 	public abstract void colourUpdateReceived(Direction fromDirection, boolean updateEagerly);
 
 	public void statusUpdateReceived() {
-		solver.statusUpdated();
+		solver.bordersUpdated();
 	}
 
     public void resetPower() {

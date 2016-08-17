@@ -43,4 +43,40 @@ public class BorderView implements Serializable {
 	public BorderStatus getBorderStatus() {
 		return border.getBorderStatus();
 	}
+
+	/**
+	 * Check if this border can receive colour from this side
+	 * @return false only if it is certain that this side cannot receive colour
+     */
+	public boolean canReceive() {
+		switch (border.getBorderStatus()) {
+			case INDIFFERENT:
+				return false;
+			case CANNOT_SEND:
+			case MANDATORY:
+				// if it's the other block that set this status, then this side cannot receive
+				// otherwise, it is still unknown
+				return border.getBorderStatusAuthor() == block;
+			default:
+				return true;
+		}
+	}
+
+	public boolean mustSend() {
+		return border.getBorderStatus() == BorderStatus.MANDATORY;
+	}
+
+	public boolean canSend() {
+		switch (border.getBorderStatus()) {
+			case INDIFFERENT:
+				return false;
+			case CANNOT_SEND:
+			case MANDATORY:
+				// if it's the other block that set this status, then this side can send
+				// otherwise, it is still unknown
+				return border.getBorderStatusAuthor() != block;
+			default:
+				return true;
+		}
+	}
 }

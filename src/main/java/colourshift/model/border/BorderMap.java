@@ -9,6 +9,7 @@ import com.google.common.collect.Maps;
 import java.io.Serializable;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class BorderMap implements Serializable {
@@ -98,5 +99,9 @@ public class BorderMap implements Serializable {
 
 	public Optional<BorderView> getBorderView(Direction direction) {
 		return map.containsKey(direction) ? Optional.of(map.get(direction)) : Optional.empty();
+	}
+
+	public Set<Direction> getExistingBordersDirections() {
+		return map.keySet();
 	}
 }

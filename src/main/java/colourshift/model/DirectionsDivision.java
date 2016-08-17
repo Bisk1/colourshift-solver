@@ -33,4 +33,18 @@ public class DirectionsDivision implements Iterable<DirectionSet> {
 				.flatMap(DirectionSet::stream)
 				.collect(Collectors.toSet());
 	}
+
+	public boolean contains(Direction direction) {
+		return dirsets.stream()
+				.anyMatch(dirset -> dirset.contains(direction));
+	}
+
+	public Optional<DirectionSet> getDirectionSetWith(Direction direction) {
+		for (DirectionSet dirset : dirsets) {
+			if (dirset.contains(direction)) {
+				return Optional.of(dirset);
+			}
+		}
+		return Optional.empty();
+	}
 }

@@ -1,8 +1,8 @@
 package colourshift.model.border;
 
-public enum BorderStatus {
+public enum ColourStatus {
     UNKNOWN,
     INDIFFERENT,
     MANDATORY,
-    CANNOT_SEND
+    FORBIDDEN
 }

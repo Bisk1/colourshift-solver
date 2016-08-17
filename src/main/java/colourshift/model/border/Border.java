@@ -6,6 +6,7 @@ import colourshift.model.blocks.Block;
 import com.google.common.collect.Sets;
 
 import java.io.Serializable;
+import java.util.Optional;
 import java.util.Set;
 
 public class Border implements Serializable {
@@ -13,6 +14,9 @@ public class Border implements Serializable {
 	private BorderSide side1;
     private BorderSide side2;
     private BorderStatus borderStatus = BorderStatus.UNKNOWN;
+    // Needed to tell the difference: if one side of the border request MANDATORY border, the other one sometimes
+    // can't do the same
+    private Block borderStatusAuthor = null;
 
     public Block otherBlock(Block block) {
         return otherSide(block).block;
@@ -89,12 +93,17 @@ public class Border implements Serializable {
     public void updateBorderStatus(Block fromBlock, BorderStatus newBorderStatus) {
         if (this.borderStatus != newBorderStatus) {
             this.borderStatus = newBorderStatus;
+            this.borderStatusAuthor = fromBlock;
             otherBlock(fromBlock).statusUpdateReceived();
         }
     }
 
     public BorderStatus getBorderStatus() {
         return borderStatus;
+    }
+
+    public Block getBorderStatusAuthor() {
+        return borderStatusAuthor;
     }
 
 }

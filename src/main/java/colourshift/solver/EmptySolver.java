@@ -12,13 +12,4 @@ public class EmptySolver extends BlockSolver {
         super(block);
     }
 
-    @Override
-    protected Set<Direction> findUnusedDirections() {
-        return Sets.newHashSet();
-    }
-
-    @Override
-    protected void reduceAnglesForUnusedBorder(Direction direction) {
-
-    }
 }

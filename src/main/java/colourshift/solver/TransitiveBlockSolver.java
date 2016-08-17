@@ -18,30 +18,4 @@ public class TransitiveBlockSolver extends BlockSolver {
         this.block = block;
     }
 
-    @Override
-    protected void reduceAnglesForUnusedBorder(Direction unusedDirection) {
-        Set<Angle> feasibleAngles = Sets.newHashSet(block.getFeasibleAngles());
-        for (Angle angle : feasibleAngles) {
-            Set<Direction> directionsSet = block.getDirectionsDivisions().get(angle).getDirections();
-            if (directionsSet.contains(unusedDirection)) {
-                block.forbidAngle(angle);
-            }
-        }
-    }
-
-
-    @Override
-    protected Set<Direction> findUnusedDirections() {
-        Set<Direction> usedDirections = new HashSet<>();
-        for (Angle angle : block.getFeasibleAngles()) {
-            DirectionsDivision directionsDivision = block.getDirectionsDivisions().get(angle);
-            for (Direction direction: directionsDivision.getDirections()) {
-                usedDirections.add(direction);
-            }
-        }
-        Set<Direction> unusedDirections = new HashSet<>(Arrays.asList(Direction.values()));
-        unusedDirections.removeAll(usedDirections);
-        return unusedDirections;
-    }
-
 }
