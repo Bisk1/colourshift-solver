@@ -42,7 +42,9 @@ public class BoardFactory {
 		Table<Integer, Integer, Block> blocks = HashBasedTable.create(rows, cols);
 		for (int i = 0; i < rows; i++) {
 			for (int j = 0; j < cols; j++) {
-				blocks.put(i, j, blockFactory.createEmpty());
+				Block newBlock = blockFactory.createEmpty();
+				newBlock.setPosition(i, j);
+				blocks.put(i, j, newBlock);
 			}
 		}
 		return blocks;

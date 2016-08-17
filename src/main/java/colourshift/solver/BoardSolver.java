@@ -14,7 +14,9 @@ public class BoardSolver {
 
     public void run() {
         validateBoard();
+        System.out.println(calculateFeasibleStatesCount());
         applyInitialRules();
+        System.out.println(calculateFeasibleStatesCount());
         board.refreshPower();
         gui.refreshBoardNode(board);
     }
@@ -30,6 +32,27 @@ public class BoardSolver {
         if (!board.isComplete()) {
             throw new RuntimeException("Board is not complete (there are some empty blocks) - solving not possible");
         }
+    }
+
+    private String calculateFeasibleStatesCount() {
+        int indexOfTwo = 0;
+        int indexOfThree = 0;
+        int unfixedBlocks = 0;
+        for (Block block : board.getBlocks().values()) {
+            int feasibleAngleCount = block.getFeasibleAngles().size();
+            if (feasibleAngleCount == 2) {
+                indexOfTwo += 1;
+            } else if (feasibleAngleCount == 4) {
+                indexOfTwo += 2;
+            } else if (feasibleAngleCount == 3) {
+                indexOfThree += 1;
+            }
+            if (feasibleAngleCount > 1) {
+                unfixedBlocks++;
+            }
+        }
+        return "Feasible states: 2 ^ " + indexOfTwo + " + 3 ^ " + indexOfThree + " Unfixed blocks: " + unfixedBlocks;
+
     }
 
 

@@ -6,6 +6,7 @@ import colourshift.model.blocks.Block;
 import java.io.Serializable;
 
 public class BorderView implements Serializable {
+	private static long serialVersionUID = 0L;
 	
 	private Border border;
 	private Block block;
@@ -42,6 +43,10 @@ public class BorderView implements Serializable {
 
 	public BorderStatus getBorderStatus() {
 		return border.getBorderStatus();
+	}
+
+	public Block getBorderStatusAuthor() {
+		return border.getBorderStatusAuthor();
 	}
 
 	/**

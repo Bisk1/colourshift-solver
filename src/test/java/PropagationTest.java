@@ -1,11 +1,9 @@
 import colourshift.model.Colour;
 import colourshift.model.Direction;
 import colourshift.model.angle.Orientation;
+import colourshift.model.angle.Single;
 import colourshift.model.angle.TurnAngle;
-import colourshift.model.blocks.Block;
-import colourshift.model.blocks.Straight;
-import colourshift.model.blocks.Target;
-import colourshift.model.blocks.Turn;
+import colourshift.model.blocks.*;
 import colourshift.model.border.Border;
 import colourshift.model.border.BorderMap;
 import colourshift.model.border.BorderStatus;
@@ -17,6 +15,7 @@ import org.junit.Test;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
@@ -24,22 +23,57 @@ import static org.mockito.Mockito.*;
 
 public class PropagationTest {
 
+    private class BorderStatusHolder {
+        private BorderStatus borderStatus;
 
-    private BorderMap mockBorderMap(Block block, Map<Direction, BorderStatus> directionToBorderStatus) {
+        public BorderStatusHolder(BorderStatus borderStatus) {
+            this.borderStatus = borderStatus;
+        }
+
+        public void set(BorderStatus borderStatus) {
+            this.borderStatus = borderStatus;
+        }
+
+        public BorderStatus get() {
+            return borderStatus;
+        }
+    }
+    private BorderMap mockBorderMap(Block block, Map<Direction, BorderStatus> directionToBorderStatus, Set<Direction> statusDirectionsSetByMe) {
         BorderMap borderMapMock = mock(BorderMap.class);
 
         for (Direction direction : Direction.values()) {
-            Border borderMock = mock(Border.class);
-            when(borderMock.getBorderStatus()).thenReturn(directionToBorderStatus.get(direction));
+            if (directionToBorderStatus.containsKey(direction)) {
 
-            BorderView borderView = new BorderView(borderMock, block);
-            BorderView borderViewSpy = spy(borderView);
+                BorderStatusHolder holder = new BorderStatusHolder(directionToBorderStatus.get(direction));
 
-            when(borderMapMock.getBorderView(direction)).thenReturn(Optional.of(borderViewSpy));
-            when(borderMapMock.contains(direction)).thenReturn(true);
-            when(borderMapMock.getExistingBordersDirections()).thenReturn(directionToBorderStatus.keySet());
+                Border borderMock = mock(Border.class);
+                when(borderMock.getBorderStatus()).thenAnswer(inv -> holder.get());
+                doAnswer(invocationOnMock -> {
+                    holder.set((BorderStatus)invocationOnMock.getArguments()[1]);
+                    return null;
+                }).when(borderMock).updateBorderStatus(any(Block.class), any(BorderStatus.class));
+
+                if (statusDirectionsSetByMe.contains(direction)) {
+                    when(borderMock.getBorderStatusAuthor()).thenReturn(block);
+                    // otherwise its null which is identified as "the other block" by border view
+                }
+
+                BorderView borderView = new BorderView(borderMock, block);
+                BorderView borderViewSpy = spy(borderView);
+
+                when(borderMapMock.getBorderView(direction)).thenReturn(Optional.of(borderViewSpy));
+                when(borderMapMock.contains(direction)).thenReturn(true);
+            } else {
+                when(borderMapMock.getBorderView(direction)).thenReturn(Optional.empty());
+                when(borderMapMock.contains(direction)).thenReturn(false);
+            }
         }
+        when(borderMapMock.getExistingBordersDirections()).thenReturn(directionToBorderStatus.keySet());
         return borderMapMock;
+    }
+
+    private BorderMap mockBorderMap(Block block, Map<Direction, BorderStatus> directionToBorderStatus) {
+        return mockBorderMap(block, directionToBorderStatus, Sets.newHashSet());
     }
 
     @Test
@@ -137,7 +171,7 @@ public class PropagationTest {
     }
 
     @Test
-    public void blockWithMandatoryBorderShouldForibdAnglesWithoutThisBorder() {
+    public void blockWithMandatoryBorderShouldForbidAnglesWithoutThisBorder() {
         Block turn = new Turn();
 
         BorderMap borderMapMock = mockBorderMap(turn, ImmutableMap.of(
@@ -152,6 +186,43 @@ public class PropagationTest {
 
         Assert.assertEquals(Sets.newHashSet(TurnAngle.LEFT_DOWN, TurnAngle.RIGHT_DOWN), turn.getFeasibleAngles());
         verify(borderMapMock.getBorderView(Direction.UP).get()).updateBorderStatus(BorderStatus.INDIFFERENT);
+    }
+
+    @Test
+    public void blockThatMustUseIndifferentBorderIsValid() {
+        HalfFour halfFour = new HalfFour();
+
+        BorderMap borderMapMock = mockBorderMap(halfFour, ImmutableMap.of(
+                Direction.LEFT, BorderStatus.UNKNOWN,
+                Direction.UP, BorderStatus.INDIFFERENT,
+                Direction.RIGHT, BorderStatus.UNKNOWN,
+                Direction.DOWN, BorderStatus.UNKNOWN
+        ));
+        halfFour.setBorderMap(borderMapMock);
+
+        halfFour.getSolver().bordersUpdated();
+
+        Assert.assertEquals(Sets.newHashSet(Single.SINGLE), halfFour.getFeasibleAngles());
+    }
+
+
+    @Test
+    public void mandatoryBorderSetByTheBlockShouldNotBeRecognizedAsSender() {
+        Block turn = new Turn();
+
+        BorderMap borderMapMock = mockBorderMap(turn,
+                ImmutableMap.of(
+                        Direction.LEFT, BorderStatus.MANDATORY,
+                        Direction.UP, BorderStatus.INDIFFERENT,
+                        Direction.RIGHT, BorderStatus.INDIFFERENT,
+                        Direction.DOWN, BorderStatus.MANDATORY
+                ),
+                Sets.newHashSet(Direction.LEFT));
+        turn.setBorderMap(borderMapMock);
+
+        turn.getSolver().bordersUpdated();
+
+        Assert.assertEquals(Sets.newHashSet(TurnAngle.LEFT_DOWN), turn.getFeasibleAngles());
     }
 
 

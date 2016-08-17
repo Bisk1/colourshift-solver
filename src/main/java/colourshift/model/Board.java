@@ -39,6 +39,7 @@ public class Board implements Serializable {
         blockFactory.deregister(oldBlock);
 
         Block newBlock = blockFactory.createAndInitBlock(newBlockType, Optional.of(newColour));
+        newBlock.setPosition(oldBlock.getX(), oldBlock.getY());
 
         BorderMap borderMap = oldBlock.getBorderMap();
         borderMap.changeBlock(newBlock);
