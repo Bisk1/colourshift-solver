@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class DirectionsDivision implements Iterable<DirectionSet> {
 	private Set<DirectionSet> dirsets;
@@ -46,5 +47,9 @@ public class DirectionsDivision implements Iterable<DirectionSet> {
 			}
 		}
 		return Optional.empty();
+	}
+
+	public Stream<DirectionSet> stream() {
+		return dirsets.stream();
 	}
 }

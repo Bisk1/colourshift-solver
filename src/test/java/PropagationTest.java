@@ -9,6 +9,7 @@ import colourshift.model.border.BorderMap;
 import colourshift.model.border.BorderStatus;
 import colourshift.model.border.BorderView;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import org.junit.Assert;
 import org.junit.Test;
@@ -39,37 +40,33 @@ public class PropagationTest {
         }
     }
     private BorderMap mockBorderMap(Block block, Map<Direction, BorderStatus> directionToBorderStatus, Set<Direction> statusDirectionsSetByMe) {
-        BorderMap borderMapMock = mock(BorderMap.class);
+        Map<Direction, BorderView> directionBorderViewMap = Maps.newHashMap();
+
+        BorderMap.Builder borderMapBuilder = new BorderMap.Builder();
 
         for (Direction direction : Direction.values()) {
             if (directionToBorderStatus.containsKey(direction)) {
+//
+//                BorderStatusHolder holder = new BorderStatusHolder(directionToBorderStatus.get(direction));
+//
+//                Border borderMock = mock(Border.class);
+//                when(borderMock.getBorderStatus()).thenAnswer(inv -> holder.get());
+//                doAnswer(invocationOnMock -> {
+//                    holder.set((BorderStatus)invocationOnMock.getArguments()[1]);
+//                    return null;
+//                }).when(borderMock).updateBorderStatus(any(Block.class), any(BorderStatus.class));
+//
+//                if (statusDirectionsSetByMe.contains(direction)) {
+//                    when(borderMock.getBorderStatusAuthor()).thenReturn(block);
+//                    // otherwise its null which is identified as "the other block" by border view
+//                }
 
-                BorderStatusHolder holder = new BorderStatusHolder(directionToBorderStatus.get(direction));
+                borderMapBuilder.createAndSetBorder(direction, block, mock(Block.class));
 
-                Border borderMock = mock(Border.class);
-                when(borderMock.getBorderStatus()).thenAnswer(inv -> holder.get());
-                doAnswer(invocationOnMock -> {
-                    holder.set((BorderStatus)invocationOnMock.getArguments()[1]);
-                    return null;
-                }).when(borderMock).updateBorderStatus(any(Block.class), any(BorderStatus.class));
-
-                if (statusDirectionsSetByMe.contains(direction)) {
-                    when(borderMock.getBorderStatusAuthor()).thenReturn(block);
-                    // otherwise its null which is identified as "the other block" by border view
-                }
-
-                BorderView borderView = new BorderView(borderMock, block);
-                BorderView borderViewSpy = spy(borderView);
-
-                when(borderMapMock.getBorderView(direction)).thenReturn(Optional.of(borderViewSpy));
-                when(borderMapMock.contains(direction)).thenReturn(true);
-            } else {
-                when(borderMapMock.getBorderView(direction)).thenReturn(Optional.empty());
-                when(borderMapMock.contains(direction)).thenReturn(false);
             }
         }
-        when(borderMapMock.getExistingBordersDirections()).thenReturn(directionToBorderStatus.keySet());
-        return borderMapMock;
+
+        return borderMapBuilder.build(block);
     }
 
     private BorderMap mockBorderMap(Block block, Map<Direction, BorderStatus> directionToBorderStatus) {

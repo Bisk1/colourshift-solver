@@ -1,6 +1,7 @@
 package colourshift.solver;
 
 import colourshift.model.Direction;
+import colourshift.model.angle.Angle;
 import colourshift.model.blocks.Block;
 import colourshift.model.blocks.Target;
 import colourshift.model.border.BorderStatus;
@@ -32,6 +33,28 @@ public class TargetSolver extends BlockSolver {
             }
         }
     }
+
+    @Override
+    protected void reduceAngles() {
+        super.reduceAngles();
+        if (!block.isFixed()) {
+            fixAngleIfRequiredColourProvidedAnywhere();
+        }
+    }
+
+    private void fixAngleIfRequiredColourProvidedAnywhere() {
+        for (Angle angle : block.getFeasibleAngles()) {
+            Direction direction = (Direction) angle;
+            if (block.getBorderMap().getBorderView(direction).isPresent()) {
+                BorderView borderView = block.getBorderMap().getBorderView(direction).get();
+                if (borderView.canReceive(block.getPower().getRequired())) {
+                    block.fixAngle(direction);
+                }
+            }
+        }
+    }
+
+
 
     @Override
     protected void propagateBorder() {

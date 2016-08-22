@@ -78,6 +78,24 @@ public class BorderMap implements Serializable {
 				.map(BorderView::getIncomingColour)
 				.reduce(Colour.GREY, (colour1, colour2) -> colour1.plus(colour2));
 	}
+	
+	public Optional<Colour> getColourMix(DirectionSet directionSet) {
+		Set<Optional<Colour>> bordersColours = map.entrySet().stream()
+				.filter(directionToBorderView -> directionSet.contains(directionToBorderView.getKey()))
+				.map(Map.Entry::getValue)
+				.map(BorderView::getColour)
+				.collect(Collectors.toSet());
+		if (bordersColours.stream().anyMatch( colour -> !colour.isPresent())) {
+			return Optional.empty();
+		} else {
+			return Optional.of(
+					bordersColours.stream()
+							.map(Optional::get)
+							.reduce(Colour.GREY, Colour::plus)
+			);
+		}
+
+	}
 
     public void reset(Block fromBlock) {
         for (BorderView borderView : map.values()) {

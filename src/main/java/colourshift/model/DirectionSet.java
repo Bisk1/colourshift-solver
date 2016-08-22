@@ -42,4 +42,5 @@ public class DirectionSet implements Iterable<Direction>, Serializable {
 	public Set<Direction> getSet() {
 		return set;
 	}
+
 }

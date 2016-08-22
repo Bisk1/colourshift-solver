@@ -83,6 +83,16 @@ public abstract class Block implements Serializable {
         }
     }
 
+	/**
+	 * Make the specified angle the only feasible one. Also set it as current.
+	 * @param angleToFix
+     */
+	public void fixAngle(Angle angleToFix) {
+		feasibleAngles = Sets.newHashSet(angleToFix);
+		angle = angleToFix;
+	}
+
+
 	public Angle getAngle() {
 		return angle;
 	}

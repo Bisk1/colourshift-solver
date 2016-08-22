@@ -1,18 +1,18 @@
 package colourshift.solver;
 
+import colourshift.model.Colour;
 import colourshift.model.Direction;
 import colourshift.model.DirectionSet;
 import colourshift.model.DirectionsDivision;
 import colourshift.model.angle.Angle;
-import colourshift.model.blocks.Block;
-import colourshift.model.blocks.Target;
 import colourshift.model.blocks.TransitiveBlock;
 import colourshift.model.border.BorderStatus;
 import colourshift.model.border.BorderView;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class TransitiveBlockSolver extends BlockSolver {
@@ -29,6 +29,7 @@ public class TransitiveBlockSolver extends BlockSolver {
     protected void reduceAngles() {
         super.reduceAngles();
         reduceAnglesWithMandatoryBordersButWithoutBorderThatCanReceive();
+
     }
 
 
@@ -63,8 +64,50 @@ public class TransitiveBlockSolver extends BlockSolver {
         super.propagateBorder();
         setMustReceiveBorders();
         setCannotSendBorders();
+        setMustSendBorders();
     }
 
+    private void setMustSendBorders() {
+        List<Angle> feasibleAngles = Lists.newArrayList(block.getFeasibleAngles());
+        Angle firstAngle = feasibleAngles.get(0);
+        List<Angle> otherAngles = feasibleAngles.subList(1, feasibleAngles.size());
+
+        Map<Direction, Colour> directionsToColours = findMustSendColourForAngle(firstAngle);
+
+        for (Angle angle : otherAngles) {
+            Map<Direction, Colour> directionToColourMapForAngle = findMustSendColourForAngle(angle);
+            List<Direction> toRemove = Lists.newArrayList();
+            for (Map.Entry<Direction, Colour> directionToColour : directionsToColours.entrySet()) {
+                Direction direction = directionToColour.getKey();
+                if (!directionToColourMapForAngle.containsKey(direction)) {
+                    toRemove.add(direction);
+                }
+                if (directionToColour.getValue() != directionToColourMapForAngle.get(direction)) {
+                    toRemove.add(direction);
+                }
+            }
+            directionsToColours.keySet().removeAll(toRemove);
+        }
+        for (Map.Entry<Direction, Colour> directionToColour : directionsToColours.entrySet()) {
+            BorderView borderView = block.getBorderMap().getBorderView(directionToColour.getKey()).get();
+            if (directionToColour.getValue() != Colour.GREY) {
+                borderView.updateBorderStatus(BorderStatus.RECEIVE, directionToColour.getValue());
+            }
+        }
+    }
+
+    private Map<Direction, Colour> findMustSendColourForAngle(Angle angle) {
+        Map<Direction, Colour> directionToColour = Maps.newHashMap();
+        for (DirectionSet directionSet : block.getDirectionsDivisions().get(angle)) {
+            Optional<Colour> colour = block.getBorderMap().getColourMix(directionSet);
+            if (colour.isPresent()) {
+                for (Direction direction : directionSet) {
+                    directionToColour.put(direction, colour.get());
+                }
+            }
+        }
+        return directionToColour;
+    }
 
     protected void setCannotSendBorders() {
         for (Direction direction : block.getBorderMap().getExistingBordersDirections()) {

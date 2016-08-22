@@ -50,6 +50,13 @@ public class BlockSolver implements Serializable {
     }
 
     public void bordersUpdated() {
+        System.out.println("bordersUpdated");
+        System.out.println(block);
+        System.out.println("x: " + block.getX() + " y: " + block.getY());
+        for (Direction direction : block.getBorderMap().getExistingBordersDirections()) {
+            BorderView borderView = block.getBorderMap().getBorderView(direction).get();
+            System.out.println(direction + ": " + borderView.getBorderStatus());
+        }
         reduceAngles();
         propagateBorder();
     }

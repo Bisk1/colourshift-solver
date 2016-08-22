@@ -34,7 +34,7 @@ public abstract class Source extends Block {
 	}
 
 	@Override
-	public Power getPower() {
+	public SourcePower getPower() {
 		return power;
 	}
 

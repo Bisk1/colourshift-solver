@@ -4,6 +4,7 @@ import colourshift.model.Colour;
 import colourshift.model.blocks.Block;
 
 import java.io.Serializable;
+import java.util.Optional;
 
 public class BorderView implements Serializable {
 	private static long serialVersionUID = 0L;
@@ -29,6 +30,10 @@ public class BorderView implements Serializable {
 		return border.getIncomingColour(block);
 	}
 
+	public Optional<Colour> getColour() {
+		return border.getColour();
+	}
+
     public void reset() {
         border.reset(block);
     }
@@ -41,6 +46,10 @@ public class BorderView implements Serializable {
 		border.updateBorderStatus(block, borderStatus);
 	}
 
+	public void updateBorderStatus(BorderStatus borderStatus, Colour colour) {
+		border.updateBorderStatus(block, borderStatus, colour);
+	}
+
 	public BorderStatus getBorderStatus() {
 		return border.getBorderStatus();
 	}
@@ -49,39 +58,15 @@ public class BorderView implements Serializable {
 		return border.getBorderStatusAuthor();
 	}
 
-	/**
-	 * Check if this border can receive colour from this side
-	 * @return false only if it is certain that this side cannot receive colour
-     */
 	public boolean canReceive() {
-		switch (border.getBorderStatus()) {
-			case INDIFFERENT:
-				return false;
-			case CANNOT_SEND:
-			case MANDATORY:
-				// if it's the other block that set this status, then this side cannot receive
-				// otherwise, it is still unknown
-				return border.getBorderStatusAuthor() == block;
-			default:
-				return true;
-		}
+		return border.canReceiveBy(block);
 	}
 
 	public boolean mustSend() {
 		return border.getBorderStatus() == BorderStatus.MANDATORY;
 	}
 
-	public boolean canSend() {
-		switch (border.getBorderStatus()) {
-			case INDIFFERENT:
-				return false;
-			case CANNOT_SEND:
-			case MANDATORY:
-				// if it's the other block that set this status, then this side can send
-				// otherwise, it is still unknown
-				return border.getBorderStatusAuthor() != block;
-			default:
-				return true;
-		}
+	public boolean canReceive(Colour colour) {
+		return border.canReceiveBy(block, colour);
 	}
 }
