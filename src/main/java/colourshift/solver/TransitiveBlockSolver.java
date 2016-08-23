@@ -6,6 +6,7 @@ import colourshift.model.DirectionSet;
 import colourshift.model.DirectionsDivision;
 import colourshift.model.angle.Angle;
 import colourshift.model.blocks.TransitiveBlock;
+import colourshift.model.border.BorderRequirement;
 import colourshift.model.border.BorderStatus;
 import colourshift.model.border.BorderView;
 import com.google.common.collect.Lists;
@@ -13,7 +14,6 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class TransitiveBlockSolver extends BlockSolver {
     private static long serialVersionUID = 0L;
@@ -28,26 +28,29 @@ public class TransitiveBlockSolver extends BlockSolver {
     @Override
     protected void reduceAngles() {
         super.reduceAngles();
-        reduceAnglesWithMandatoryBordersButWithoutBorderThatCanReceive();
+        reduceAnglesWithMustSendBordersButWithoutBorderThatCanReceive();
 
     }
 
 
-    private void reduceAnglesWithMandatoryBordersButWithoutBorderThatCanReceive() {
+    private void reduceAnglesWithMustSendBordersButWithoutBorderThatCanReceive() {
         Set<Angle> feasibleAngles = Sets.newHashSet(block.getFeasibleAngles()); // the original collection will be modified
         for (Angle angle: feasibleAngles) {
             DirectionsDivision directionsDivision = block.getDirectionsDivisions().get(angle);
             for (DirectionSet directionSet : directionsDivision) {
                 Set<Direction> canReceiveDirections = Sets.newHashSet();
                 Set<Direction> mustSendDirections = Sets.newHashSet();
+                Set<Colour> mustSendColours = Sets.newHashSet();
                 for (Direction direction : directionSet) {
                     if (block.getBorderMap().getBorderView(direction).isPresent()) {
                         BorderView borderView = block.getBorderMap().getBorderView(direction).get();
                         if (borderView.canReceive()) {
                             canReceiveDirections.add(direction);
                         }
-                        if (borderView.mustSend()) {
+                        Optional<Colour> mustSendColour = borderView.mustSend();
+                        if (mustSendColour.isPresent()) {
                             mustSendDirections.add(direction);
+                            mustSendColours.add(mustSendColour.get());
                         }
                     }
                 }
@@ -58,13 +61,118 @@ public class TransitiveBlockSolver extends BlockSolver {
         }
     }
 
-
     @Override
     protected void propagateBorder() {
         super.propagateBorder();
-        setMustReceiveBorders();
-        setCannotSendBorders();
         setMustSendBorders();
+        setUpdates();
+    }
+
+    private void setUpdates() {
+        // 1. Init map for all borders directions
+        Map<Direction, Set<BorderRequirement>> directionsToUpdatesCandidates = Maps.newHashMap();
+        for (Direction direction : block.getBorderMap().getExistingBordersDirections()) {
+            directionsToUpdatesCandidates.put(direction, Sets.newHashSet());
+        }
+        // 2. Collect entries for every angle
+        for (Angle angle : block.getFeasibleAngles()) {
+            Map<Direction, BorderRequirement> updateCandidatesForAngle = getUpdatesCandidatesForAngle(angle);
+            for (Map.Entry<Direction, Set<BorderRequirement>> directionToCandidate : directionsToUpdatesCandidates.entrySet()) {
+                directionToCandidate.getValue().add(updateCandidatesForAngle.get(directionToCandidate.getKey()));
+            }
+        }
+        // 3. Merge events and propagate them
+        for (Map.Entry<Direction, Set<BorderRequirement>> directionToCandidates : directionsToUpdatesCandidates.entrySet()) {
+            Optional<BorderView> borderView = block.getBorderMap().getBorderView(directionToCandidates.getKey());
+            if (borderView.isPresent()) {
+                Optional<BorderRequirement> update = mergeUpdates(directionToCandidates.getValue());
+                if (update.isPresent()) {
+                    borderView.get().updateBorderStatus(update.get());
+                }
+            }
+        }
+    }
+
+    private Map<Direction, BorderRequirement> getUpdatesCandidatesForAngle(Angle angle) {
+        Map<Direction, BorderRequirement> updatesCandidates = Maps.newHashMap();
+        for (Direction direction : Direction.values()) {
+            updatesCandidates.put(direction, BorderRequirement.unknown());
+        }
+
+        DirectionsDivision directionsDivision = block.getDirectionsDivisions().get(angle);
+
+        for (DirectionSet directionSet : directionsDivision) {
+            Set<Direction> canReceiveDirections = Sets.newHashSet();
+            Set<Direction> mustSendDirections = Sets.newHashSet();
+            Set<Colour> mustSendColours = Sets.newHashSet();
+
+            for (Direction direction : directionSet) {
+                Optional<BorderView> borderView = block.getBorderMap().getBorderView(direction);
+                if (borderView.isPresent()) {
+                    if (borderView.get().canReceive()) {
+                        canReceiveDirections.add(direction);
+                    }
+                    Optional<Colour> mustSendColour = borderView.get().mustSend();
+                    if (mustSendColour.isPresent()) {
+                        mustSendDirections.add(direction);
+                        mustSendColours.add(mustSendColour.get());
+                    }
+                }
+            }
+            if (canReceiveDirections.size() == 1) {
+                updatesCandidates.put(canReceiveDirections.iterator().next(), BorderRequirement.cannotSend());
+            }
+            if (!mustSendDirections.isEmpty()
+                    && mustSendColours.size() == 1
+                    && canReceiveDirections.size() == 1) {
+                updatesCandidates.put(canReceiveDirections.iterator().next(),
+                        BorderRequirement.mustSend(mustSendColours.iterator().next()));
+            }
+        }
+
+        Sets.newHashSet(Direction.values()).stream()
+                .filter(direction -> !directionsDivision.contains(direction))
+                .forEach(direction -> updatesCandidates.put(direction, BorderRequirement.indifferent()));
+
+
+        return updatesCandidates;
+    }
+
+    private Optional<BorderRequirement> mergeUpdates(Set<BorderRequirement> updatesCandidates) {
+        if (updatesCandidates.stream()
+                .anyMatch(borderRequirement -> borderRequirement.getBorderStatus() == BorderStatus.UNKNOWN)) {
+            return Optional.empty();
+        }
+        if (updatesCandidates.stream()
+                .allMatch(borderRequirement -> borderRequirement.getBorderStatus() == BorderStatus.INDIFFERENT)) {
+            return Optional.of(BorderRequirement.indifferent());
+        }
+        if (updatesCandidates.stream()
+                .allMatch(borderRequirement -> borderRequirement.getBorderStatus() == BorderStatus.MUST_SEND)) {
+            Colour colourCandidate = updatesCandidates.iterator().next().getColour().get();
+            if (updatesCandidates.stream()
+                    .allMatch(borderRequirement -> borderRequirement.getColour().get() == colourCandidate)) {
+                return Optional.of(BorderRequirement.mustSend(colourCandidate));
+            }
+        }
+        if (updatesCandidates.stream()
+                .allMatch(borderRequirement -> borderRequirement.getBorderStatus() == BorderStatus.CANNOT_SEND
+                        || borderRequirement.getBorderStatus() == BorderStatus.INDIFFERENT
+                        || borderRequirement.getBorderStatus() == BorderStatus.MUST_SEND)) {
+            Optional<Colour> colourCandidate = updatesCandidates.stream()
+                    .map(BorderRequirement::getColour)
+                    .filter(Optional::isPresent)
+                    .map(Optional::get)
+                    .findFirst();
+            if (colourCandidate.isPresent()
+                    && updatesCandidates.stream()
+                    .map(BorderRequirement::getColour)
+                    .allMatch(colour -> colour.isPresent() && colour.get() == colourCandidate.get())) {
+                return Optional.of(BorderRequirement.mustSend(colourCandidate.get()));
+            }
+            return Optional.of(BorderRequirement.cannotSend());
+        }
+        return Optional.empty();
     }
 
     private void setMustSendBorders() {
@@ -91,7 +199,7 @@ public class TransitiveBlockSolver extends BlockSolver {
         for (Map.Entry<Direction, Colour> directionToColour : directionsToColours.entrySet()) {
             BorderView borderView = block.getBorderMap().getBorderView(directionToColour.getKey()).get();
             if (directionToColour.getValue() != Colour.GREY) {
-                borderView.updateBorderStatus(BorderStatus.RECEIVE, directionToColour.getValue());
+                borderView.updateBorderStatus(BorderRequirement.canReceive(directionToColour.getValue()));
             }
         }
     }
@@ -108,80 +216,5 @@ public class TransitiveBlockSolver extends BlockSolver {
         }
         return directionToColour;
     }
-
-    protected void setCannotSendBorders() {
-        for (Direction direction : block.getBorderMap().getExistingBordersDirections()) {
-            BorderView borderView = block.getBorderMap().getBorderView(direction).get();
-            if (borderView.getBorderStatus() == BorderStatus.MANDATORY ||
-                    borderView.getBorderStatus() == BorderStatus.CANNOT_SEND ||
-                    borderView.getBorderStatus() == BorderStatus.INDIFFERENT) {
-                continue;
-            }
-            // 1. Find all angles that contain this border
-            Set<Angle> usedAngles = Sets.newHashSet();
-            for (Angle angle: block.getFeasibleAngles()) {
-                if (block.getDirectionsDivisions().get(angle).contains(direction)) {
-                    usedAngles.add(angle);
-                }
-            }
-            // 2. For each angle that uses this border, check if none of borders used by this angle can receive
-            // Don't check the border under investigation, as it will be determined by this check
-            boolean foundBlockThatCanReceive = false;
-            for (Angle angle: usedAngles) {
-                DirectionSet directionSetWithTheDirection = block.getDirectionsDivisions().get(angle).getDirectionSetWith(direction).get();
-
-                for (Direction usedDirection: directionSetWithTheDirection) {
-                    if (usedDirection != direction && block.getBorderMap().getBorderView(usedDirection).isPresent() &&
-                            block.getBorderMap().getBorderView(usedDirection).get().canReceive()) {
-                        foundBlockThatCanReceive = true;
-                    }
-                }
-            }
-            if (!foundBlockThatCanReceive) {
-                borderView.updateBorderStatus(BorderStatus.CANNOT_SEND);
-            }
-        }
-    }
-
-    private void setMustReceiveBorders() {
-        Set<Direction> mustReceiveCandidates = Sets.newHashSet(Direction.values());
-        // direction is classified as 'must receive' only if it is 'must receive' for all feasible angles
-        for (Angle angle : block.getFeasibleAngles()) {
-            Set<Direction> mustReceiveDirectionsForAngle = findMustReceiveBordersForAngle(angle);
-            mustReceiveCandidates = mustReceiveCandidates.stream()
-                    .filter(mustReceiveDirectionsForAngle::contains)
-                    .collect(Collectors.toSet());
-        }
-        mustReceiveCandidates.forEach(
-                mustReceiveDirection ->
-                        block.getBorderMap().getBorderView(mustReceiveDirection).get().updateBorderStatus(BorderStatus.MANDATORY));
-
-    }
-
-    private Set<Direction> findMustReceiveBordersForAngle(Angle angle) {
-        Set<Direction> mustReceiveBorders = Sets.newHashSet();
-        DirectionsDivision directionsDivision = block.getDirectionsDivisions().get(angle);
-        for (DirectionSet directionSet : directionsDivision) {
-            Set<Direction> mustSendDirections = Sets.newHashSet();
-            Set<Direction> canReceiveDirections = Sets.newHashSet();
-            for (Direction direction : directionSet) {
-                if (!block.getBorderMap().getBorderView(direction).isPresent()) {
-                    continue;
-                }
-                BorderView borderView = block.getBorderMap().getBorderView(direction).get();
-                if (borderView.canReceive()) {
-                    canReceiveDirections.add(direction);
-                }
-                if (borderView.mustSend()) {
-                    mustSendDirections.add(direction);
-                }
-            }
-            if (!mustSendDirections.isEmpty() && canReceiveDirections.size() == 1) {
-                mustReceiveBorders.add(canReceiveDirections.iterator().next());
-            }
-        }
-        return mustReceiveBorders;
-    }
-
 
 }

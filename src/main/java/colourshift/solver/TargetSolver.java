@@ -4,6 +4,7 @@ import colourshift.model.Direction;
 import colourshift.model.angle.Angle;
 import colourshift.model.blocks.Block;
 import colourshift.model.blocks.Target;
+import colourshift.model.border.BorderRequirement;
 import colourshift.model.border.BorderStatus;
 import colourshift.model.border.BorderView;
 
@@ -45,16 +46,14 @@ public class TargetSolver extends BlockSolver {
     private void fixAngleIfRequiredColourProvidedAnywhere() {
         for (Angle angle : block.getFeasibleAngles()) {
             Direction direction = (Direction) angle;
-            if (block.getBorderMap().getBorderView(direction).isPresent()) {
-                BorderView borderView = block.getBorderMap().getBorderView(direction).get();
-                if (borderView.canReceive(block.getPower().getRequired())) {
+            Optional<BorderView> borderView = block.getBorderMap().getBorderView(direction);
+            if (borderView.isPresent()) {
+                if (borderView.get().provided(block.getPower().getRequired())) {
                     block.fixAngle(direction);
                 }
             }
         }
     }
-
-
 
     @Override
     protected void propagateBorder() {
@@ -67,14 +66,14 @@ public class TargetSolver extends BlockSolver {
 
     private void setTheOnlyUsedBorderAsMandatory() {
         Direction mandatoryDirection = (Direction) block.getFeasibleAngles().iterator().next();
-        block.getBorderMap().getBorderView(mandatoryDirection).get().updateBorderStatus(BorderStatus.MANDATORY);
+        block.getBorderMap().getBorderView(mandatoryDirection).get().updateBorderStatus(BorderRequirement.mustSend(block.getPower().getRequired()));
     }
 
     private void setUnknownBordersToCannotSend() {
         for (Direction direction : block.getBorderMap().getExistingBordersDirections()) {
             BorderView borderView = block.getBorderMap().getBorderView(direction).get();
-            if (borderView.getBorderStatus() == BorderStatus.UNKNOWN) {
-                borderView.updateBorderStatus(BorderStatus.CANNOT_SEND);
+            if (borderView.getBorderRequirement().getBorderStatus() == BorderStatus.UNKNOWN) {
+                borderView.updateBorderStatus(BorderRequirement.cannotSend());
             }
         }
     }

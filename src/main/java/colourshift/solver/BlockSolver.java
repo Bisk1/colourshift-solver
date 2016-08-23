@@ -1,10 +1,10 @@
 package colourshift.solver;
 
 import colourshift.model.Direction;
-import colourshift.model.DirectionSet;
 import colourshift.model.DirectionsDivision;
 import colourshift.model.angle.Angle;
 import colourshift.model.blocks.*;
+import colourshift.model.border.BorderRequirement;
 import colourshift.model.border.BorderStatus;
 import colourshift.model.border.BorderView;
 import com.google.common.collect.Sets;
@@ -50,12 +50,8 @@ public class BlockSolver implements Serializable {
     }
 
     public void bordersUpdated() {
-        System.out.println("bordersUpdated");
-        System.out.println(block);
-        System.out.println("x: " + block.getX() + " y: " + block.getY());
         for (Direction direction : block.getBorderMap().getExistingBordersDirections()) {
             BorderView borderView = block.getBorderMap().getBorderView(direction).get();
-            System.out.println(direction + ": " + borderView.getBorderStatus());
         }
         reduceAngles();
         propagateBorder();
@@ -75,7 +71,7 @@ public class BlockSolver implements Serializable {
     private void reduceAnglesWithIndifferentBorders() {
         for (Direction direction : Direction.values()) {
             Optional<BorderView> borderView = block.getBorderMap().getBorderView(direction);
-            if (borderView.isPresent() && borderView.get().getBorderStatus().equals(BorderStatus.INDIFFERENT)) {
+            if (borderView.isPresent() && borderView.get().getBorderRequirement().getBorderStatus() == BorderStatus.INDIFFERENT) {
                 tryToForbidAnglesWithBorder(direction);
             }
         }
@@ -84,7 +80,7 @@ public class BlockSolver implements Serializable {
     private void reduceAnglesWithoutMandatoryBorders() {
         for (Direction direction : Direction.values()) {
             Optional<BorderView> borderView = block.getBorderMap().getBorderView(direction);
-            if (borderView.isPresent() && borderView.get().getBorderStatus().equals(BorderStatus.MANDATORY)) {
+            if (borderView.isPresent() && borderView.get().getBorderRequirement().getBorderStatus() == BorderStatus.MUST_SEND) {
                 forbidAnglesWithoutBorder(direction);
             }
         }
@@ -97,7 +93,7 @@ public class BlockSolver implements Serializable {
         Set<Direction> unusedDirections = findUnusedDirections();
         for (Direction unusedDirection : unusedDirections) {
             block.getBorderMap().getBorderView(unusedDirection)
-                    .ifPresent(borderView -> borderView.updateBorderStatus(BorderStatus.INDIFFERENT));
+                    .ifPresent(borderView -> borderView.updateBorderStatus(BorderRequirement.indifferent()));
         }
     }
 

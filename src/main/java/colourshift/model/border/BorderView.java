@@ -42,31 +42,23 @@ public class BorderView implements Serializable {
 		return border.otherBlock(block);
 	}
 
-	public void updateBorderStatus(BorderStatus borderStatus) {
-		border.updateBorderStatus(block, borderStatus);
+	public void updateBorderStatus(BorderRequirement borderRequirement) {
+		border.updateBorderStatus(block, borderRequirement);
 	}
 
-	public void updateBorderStatus(BorderStatus borderStatus, Colour colour) {
-		border.updateBorderStatus(block, borderStatus, colour);
-	}
-
-	public BorderStatus getBorderStatus() {
-		return border.getBorderStatus();
-	}
-
-	public Block getBorderStatusAuthor() {
-		return border.getBorderStatusAuthor();
+	public BorderRequirement getBorderRequirement() {
+		return border.getBorderRequirement();
 	}
 
 	public boolean canReceive() {
 		return border.canReceiveBy(block);
 	}
 
-	public boolean mustSend() {
-		return border.getBorderStatus() == BorderStatus.MANDATORY;
+	public Optional<Colour> mustSend() {
+		return border.getBorderRequirement().getBorderStatus() == BorderStatus.MUST_SEND ? border.getColour() : Optional.empty();
 	}
 
-	public boolean canReceive(Colour colour) {
-		return border.canReceiveBy(block, colour);
+	public boolean provided(Colour colour) {
+		return border.providedTo(block, colour);
 	}
 }

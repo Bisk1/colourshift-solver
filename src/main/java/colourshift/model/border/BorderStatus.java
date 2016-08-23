@@ -3,8 +3,8 @@ package colourshift.model.border;
 public enum BorderStatus {
     UNKNOWN(0),
     CANNOT_SEND(1),
-    RECEIVE(2),
-    MANDATORY(3),
+    CAN_RECEIVE(2),
+    MUST_SEND(3),
     INDIFFERENT(3);
 
     /**
