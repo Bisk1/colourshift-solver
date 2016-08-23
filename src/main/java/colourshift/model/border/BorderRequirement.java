@@ -2,9 +2,10 @@ package colourshift.model.border;
 
 import colourshift.model.Colour;
 
+import java.io.Serializable;
 import java.util.Optional;
 
-public class BorderRequirement {
+public class BorderRequirement implements Serializable {
     private BorderStatus borderStatus;
     private Colour colour;
 
@@ -48,4 +49,5 @@ public class BorderRequirement {
     public boolean strongerThan(BorderRequirement other) {
         return getStrength() > other.getStrength();
     }
+
 }

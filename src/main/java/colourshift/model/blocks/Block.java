@@ -6,6 +6,7 @@ import colourshift.model.angle.Angle;
 import colourshift.model.border.BorderMap;
 import colourshift.model.power.Power;
 import colourshift.solver.BlockSolver;
+import colourshift.solver.UnsolvableException;
 import colourshift.util.IterationUtils;
 import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.Sets;
@@ -78,6 +79,9 @@ public abstract class Block implements Serializable {
      */
     public void forbidAngle(Angle angleToForbid) {
         feasibleAngles.remove(angleToForbid);
+		if (feasibleAngles.isEmpty()) {
+			throw new UnsolvableException();
+		}
         if (angleToForbid == angle) {
             angle = feasibleAngles.iterator().next();
         }
@@ -90,6 +94,11 @@ public abstract class Block implements Serializable {
 	public void fixAngle(Angle angleToFix) {
 		feasibleAngles = Sets.newHashSet(angleToFix);
 		angle = angleToFix;
+	}
+
+	public void revertAngles(Set<Angle> feasibleAngles, Angle angle) {
+		this.feasibleAngles = feasibleAngles;
+		this.angle = angle;
 	}
 
 
@@ -117,18 +126,18 @@ public abstract class Block implements Serializable {
     }
 
     //debugging
-    private int x;
-	private int y;
-    public void setPosition(int x, int y) {
-    	this.x = x;
-		this.y = y;
+    private int row;
+	private int col;
+    public void setPosition(int row, int col) {
+    	this.row = row;
+		this.col = col;
 	}
 
-	public int getX() {
-	    return x;
+	public int getRow() {
+	    return row;
     }
 
-    public int getY() {
-        return y;
+    public int getCol() {
+        return col;
     }
 }

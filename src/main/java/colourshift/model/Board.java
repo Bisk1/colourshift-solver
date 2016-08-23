@@ -4,7 +4,7 @@ import colourshift.model.blocks.*;
 import colourshift.model.border.BorderMap;
 import com.google.common.collect.Table;
 
-import java.io.Serializable;
+import java.io.*;
 import java.util.Optional;
 
 public class Board implements Serializable {
@@ -39,7 +39,7 @@ public class Board implements Serializable {
         blockFactory.deregister(oldBlock);
 
         Block newBlock = blockFactory.createAndInitBlock(newBlockType, Optional.of(newColour));
-        newBlock.setPosition(oldBlock.getX(), oldBlock.getY());
+        newBlock.setPosition(oldBlock.getRow(), oldBlock.getCol());
 
         BorderMap borderMap = oldBlock.getBorderMap();
         borderMap.changeBlock(newBlock);
@@ -70,6 +70,37 @@ public class Board implements Serializable {
                 .stream()
                 .noneMatch(e -> e instanceof Empty);
     }
+
+    public boolean isSolved() {
+        return targetManager.areAllActive();
+    }
+
+
+    /**
+     * Returns a deep copy of the board
+     */
+    public Board copy() {
+        Board copy = null;
+        try {
+            // Write the object out to a byte array
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            ObjectOutputStream out = new ObjectOutputStream(bos);
+            out.writeObject(this);
+            out.flush();
+            out.close();
+
+            // Make an input stream from the byte array and read
+            // a copy of the object back in.
+            ObjectInputStream in = new ObjectInputStream(
+                    new ByteArrayInputStream(bos.toByteArray()));
+            copy = (Board)in.readObject();
+        }
+        catch(IOException | ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        return copy;
+    }
+
 
     public Table<Integer, Integer, Block> getBlocks() {
         return blocks;

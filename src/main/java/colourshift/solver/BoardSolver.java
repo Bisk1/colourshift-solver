@@ -2,6 +2,7 @@ package colourshift.solver;
 
 import colourshift.gui.Gui;
 import colourshift.model.Board;
+import colourshift.model.angle.Angle;
 import colourshift.model.blocks.Block;
 
 public class BoardSolver {
@@ -15,11 +16,52 @@ public class BoardSolver {
     public void run() {
         validateBoard();
         System.out.println(calculateFeasibleStatesCount());
-        applyInitialRules();
+        try {
+            solve(board);
+        } catch (UnsolvableException e) {
+            System.out.println("Impossible to solve");
+        }
         System.out.println(calculateFeasibleStatesCount());
-        board.refreshPower();
         gui.refreshBoardNode(board);
     }
+
+    private void solve(Board board) {
+        applyInitialRules();
+        board.refreshPower();
+        if (!board.isSolved()) {
+            branchAndBound(board);
+        }
+    }
+
+    private void branchAndBound(Board board) {
+        Block blockToFix = findAnyUnfixedBlock(board);
+        for (Angle angleToFix : blockToFix.getFeasibleAngles()) {
+            Board boardBranch = board.copy();
+            Block blockBranch = boardBranch.get(blockToFix.getRow(), blockToFix.getCol());
+            blockBranch.fixAngle(angleToFix);
+            try {
+                blockBranch.statusUpdateReceived();
+                boardBranch.refreshPower();
+                if (boardBranch.isSolved()) {
+                    this.board = boardBranch;
+                    return;
+                } else {
+                    branchAndBound(boardBranch);
+                }
+            } catch (UnsolvableException e) {
+                // Unacceptable angle, try another
+            }
+        }
+        throw new UnsolvableException();
+    }
+
+    private Block findAnyUnfixedBlock(Board board) {
+        return board.getBlocks().values().stream()
+                .filter(block -> !block.isFixed())
+                .findFirst()
+                .orElseThrow(() -> new UnsolvableException("No unfixed blocks"));
+    }
+
 
     private void applyInitialRules() {
         for (Block block : board.getBlocks().values()) {

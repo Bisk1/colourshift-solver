@@ -100,9 +100,9 @@ public class PropagationTest {
 
         turn.getSolver().bordersUpdated();
 
-        Assert.assertEquals(BorderStatus.INDIFFERENT, turn.getBorderMap().getBorderView(Direction.UP).get().getBorderRequirement());
-        Assert.assertEquals(BorderStatus.CANNOT_SEND, turn.getBorderMap().getBorderView(Direction.LEFT).get().getBorderRequirement());
-        Assert.assertEquals(BorderStatus.CANNOT_SEND, turn.getBorderMap().getBorderView(Direction.RIGHT).get().getBorderRequirement());
+        Assert.assertEquals(BorderStatus.INDIFFERENT, turn.getBorderMap().getBorderView(Direction.UP).get().getBorderRequirement().getBorderStatus());
+        Assert.assertEquals(BorderStatus.CANNOT_SEND, turn.getBorderMap().getBorderView(Direction.LEFT).get().getBorderRequirement().getBorderStatus());
+        Assert.assertEquals(BorderStatus.CANNOT_SEND, turn.getBorderMap().getBorderView(Direction.RIGHT).get().getBorderRequirement().getBorderStatus());
     }
 
     @Test
@@ -120,9 +120,9 @@ public class PropagationTest {
 
         Assert.assertEquals(Sets.newHashSet(TurnAngle.LEFT_DOWN), turn.getFeasibleAngles());
 
-        Assert.assertEquals(BorderStatus.INDIFFERENT, turn.getBorderMap().getBorderView(Direction.UP).get().getBorderRequirement());
-        Assert.assertEquals(BorderStatus.MUST_SEND, turn.getBorderMap().getBorderView(Direction.LEFT).get().getBorderRequirement());
-        Assert.assertEquals(BorderStatus.INDIFFERENT, turn.getBorderMap().getBorderView(Direction.RIGHT).get().getBorderRequirement());
+        Assert.assertEquals(BorderStatus.INDIFFERENT, turn.getBorderMap().getBorderView(Direction.UP).get().getBorderRequirement().getBorderStatus());
+        Assert.assertEquals(BorderStatus.MUST_SEND, turn.getBorderMap().getBorderView(Direction.LEFT).get().getBorderRequirement().getBorderStatus());
+        Assert.assertEquals(BorderStatus.INDIFFERENT, turn.getBorderMap().getBorderView(Direction.RIGHT).get().getBorderRequirement().getBorderStatus());
     }
 
     @Test
@@ -139,7 +139,8 @@ public class PropagationTest {
         straight.getSolver().bordersUpdated();
 
         Assert.assertThat(straight.getAngle(), is(equalTo(Orientation.VERTICAL)));
-        Assert.assertEquals(BorderRequirement.indifferent(), straight.getBorderMap().getBorderView(Direction.RIGHT).get().getBorderRequirement());
+        Assert.assertEquals(BorderStatus.INDIFFERENT,
+                straight.getBorderMap().getBorderView(Direction.RIGHT).get().getBorderRequirement().getBorderStatus());
     }
 
     @Test
@@ -156,7 +157,7 @@ public class PropagationTest {
         turn.getSolver().bordersUpdated();
 
         Assert.assertEquals(Sets.newHashSet(TurnAngle.LEFT_DOWN, TurnAngle.RIGHT_DOWN), turn.getFeasibleAngles());
-        Assert.assertEquals(BorderRequirement.indifferent(), turn.getBorderMap().getBorderView(Direction.UP).get().getBorderRequirement());
+        Assert.assertEquals(BorderStatus.INDIFFERENT, turn.getBorderMap().getBorderView(Direction.UP).get().getBorderRequirement().getBorderStatus());
     }
 
     @Test

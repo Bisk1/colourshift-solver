@@ -64,7 +64,6 @@ public class TransitiveBlockSolver extends BlockSolver {
     @Override
     protected void propagateBorder() {
         super.propagateBorder();
-        setMustSendBorders();
         setUpdates();
     }
 
@@ -119,6 +118,14 @@ public class TransitiveBlockSolver extends BlockSolver {
                     }
                 }
             }
+
+            Optional<Colour> colour = block.getBorderMap().getColourMix(directionSet);
+            if (colour.isPresent()) {
+                for (Direction direction : directionSet) {
+                    updatesCandidates.put(direction, BorderRequirement.canReceive(colour.get()));
+                }
+            }
+
             if (canReceiveDirections.size() == 1) {
                 updatesCandidates.put(canReceiveDirections.iterator().next(), BorderRequirement.cannotSend());
             }
@@ -156,6 +163,14 @@ public class TransitiveBlockSolver extends BlockSolver {
             }
         }
         if (updatesCandidates.stream()
+                .allMatch(borderRequirement -> borderRequirement.getBorderStatus() == BorderStatus.CAN_RECEIVE)) {
+            Colour colourCandidate = updatesCandidates.iterator().next().getColour().get();
+            if (updatesCandidates.stream()
+                    .allMatch(borderRequirement -> borderRequirement.getColour().get() == colourCandidate)) {
+                return Optional.of(BorderRequirement.canReceive(colourCandidate));
+            }
+        }
+        if (updatesCandidates.stream()
                 .allMatch(borderRequirement -> borderRequirement.getBorderStatus() == BorderStatus.CANNOT_SEND
                         || borderRequirement.getBorderStatus() == BorderStatus.INDIFFERENT
                         || borderRequirement.getBorderStatus() == BorderStatus.MUST_SEND)) {
@@ -173,48 +188,6 @@ public class TransitiveBlockSolver extends BlockSolver {
             return Optional.of(BorderRequirement.cannotSend());
         }
         return Optional.empty();
-    }
-
-    private void setMustSendBorders() {
-        List<Angle> feasibleAngles = Lists.newArrayList(block.getFeasibleAngles());
-        Angle firstAngle = feasibleAngles.get(0);
-        List<Angle> otherAngles = feasibleAngles.subList(1, feasibleAngles.size());
-
-        Map<Direction, Colour> directionsToColours = findMustSendColourForAngle(firstAngle);
-
-        for (Angle angle : otherAngles) {
-            Map<Direction, Colour> directionToColourMapForAngle = findMustSendColourForAngle(angle);
-            List<Direction> toRemove = Lists.newArrayList();
-            for (Map.Entry<Direction, Colour> directionToColour : directionsToColours.entrySet()) {
-                Direction direction = directionToColour.getKey();
-                if (!directionToColourMapForAngle.containsKey(direction)) {
-                    toRemove.add(direction);
-                }
-                if (directionToColour.getValue() != directionToColourMapForAngle.get(direction)) {
-                    toRemove.add(direction);
-                }
-            }
-            directionsToColours.keySet().removeAll(toRemove);
-        }
-        for (Map.Entry<Direction, Colour> directionToColour : directionsToColours.entrySet()) {
-            BorderView borderView = block.getBorderMap().getBorderView(directionToColour.getKey()).get();
-            if (directionToColour.getValue() != Colour.GREY) {
-                borderView.updateBorderStatus(BorderRequirement.canReceive(directionToColour.getValue()));
-            }
-        }
-    }
-
-    private Map<Direction, Colour> findMustSendColourForAngle(Angle angle) {
-        Map<Direction, Colour> directionToColour = Maps.newHashMap();
-        for (DirectionSet directionSet : block.getDirectionsDivisions().get(angle)) {
-            Optional<Colour> colour = block.getBorderMap().getColourMix(directionSet);
-            if (colour.isPresent()) {
-                for (Direction direction : directionSet) {
-                    directionToColour.put(direction, colour.get());
-                }
-            }
-        }
-        return directionToColour;
     }
 
 }

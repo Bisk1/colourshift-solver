@@ -40,11 +40,11 @@ public class BoardFactory {
 	}
 	private Table<Integer, Integer, Block> createBlocks(int rows, int cols) {
 		Table<Integer, Integer, Block> blocks = HashBasedTable.create(rows, cols);
-		for (int i = 0; i < rows; i++) {
-			for (int j = 0; j < cols; j++) {
+		for (int row = 0; row < rows; row++) {
+			for (int col = 0; col < cols; col++) {
 				Block newBlock = blockFactory.createEmpty();
-				newBlock.setPosition(i, j);
-				blocks.put(i, j, newBlock);
+				newBlock.setPosition(row, col);
+				blocks.put(row, col, newBlock);
 			}
 		}
 		return blocks;
