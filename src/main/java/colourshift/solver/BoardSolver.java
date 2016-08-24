@@ -15,13 +15,14 @@ public class BoardSolver {
 
     public void run() {
         validateBoard();
-        System.out.println(calculateFeasibleStatesCount());
+        countAndLogFeasibleStates();
         try {
             solve(board);
+            System.out.println("Solving successful");
         } catch (UnsolvableException e) {
             System.out.println("Impossible to solve");
         }
-        System.out.println(calculateFeasibleStatesCount());
+        countAndLogFeasibleStates();
         gui.refreshBoardNode(board);
     }
 
@@ -44,10 +45,10 @@ public class BoardSolver {
                 boardBranch.refreshPower();
                 if (boardBranch.isSolved()) {
                     this.board = boardBranch;
-                    return;
                 } else {
                     branchAndBound(boardBranch);
                 }
+                return;
             } catch (UnsolvableException e) {
                 // Unacceptable angle, try another
             }
@@ -76,7 +77,7 @@ public class BoardSolver {
         }
     }
 
-    private String calculateFeasibleStatesCount() {
+    private void countAndLogFeasibleStates() {
         int indexOfTwo = 0;
         int indexOfThree = 0;
         int unfixedBlocks = 0;
@@ -93,7 +94,7 @@ public class BoardSolver {
                 unfixedBlocks++;
             }
         }
-        return "Feasible states: 2 ^ " + indexOfTwo + " + 3 ^ " + indexOfThree + " Unfixed blocks: " + unfixedBlocks;
+        System.out.println("Feasible states: 2 ^ " + indexOfTwo + " + 3 ^ " + indexOfThree + " Unfixed blocks: " + unfixedBlocks);
 
     }
 

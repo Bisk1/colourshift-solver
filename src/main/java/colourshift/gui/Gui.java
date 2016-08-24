@@ -53,6 +53,9 @@ public class Gui {
     private ImageView selectedBlockImage;
     private VBox blockTypeChooserNode;
 
+    // Can be replaced with a copy after solving
+    private Board board;
+
     /**
      * Collection of images for all board blocks
      */
@@ -113,7 +116,7 @@ public class Gui {
         grid.add(createBlockTypeChooserNode(), 1, 0, 1, 3);
         grid.add(createSelectedBlockNode(), 0, 2, 1, 1);
         grid.add(createBoardNode(board), 2, 1);
-        grid.add(createMenuNode(primaryStage, board), 2, 2);
+        grid.add(createMenuNode(primaryStage), 2, 2);
         grid.add(createLogNode(), 2, 3);
 
         Scene scene = new Scene(grid);
@@ -122,6 +125,7 @@ public class Gui {
     }
 
     private Node createBoardNode(Board board) {
+        this.board = board;
         blocksImageViewsTable = HashBasedTable.create();
         GridPane boardScene = new GridPane();
         for (int row = 0; row < board.size(); row++) {
@@ -130,14 +134,19 @@ public class Gui {
                 Image image = imageProvider.getBlockImage(block);
                 ImageView imageView = new ImageView(image);
                 boardScene.add(imageView, column, row);
-                attachClickHandler(imageView, board, row, column);
+                attachClickHandler(imageView, row, column);
                 blocksImageViewsTable.put(row, column, imageView);
             }
         }
         return boardScene;
     }
 
+    /**
+     * Update instance of the board and refresh all images
+     * @param board new board to use
+     */
     public void refreshBoardNode(Board board) {
+        this.board = board;
         for (int row = 0; row < board.size(); row++) {
             for (int column = 0; column < board.size(); column++) {
                 Block block = board.get(row, column);
@@ -147,7 +156,7 @@ public class Gui {
         }
     }
 
-    private void attachClickHandler(ImageView imageView, Board board, int row, int column) {
+    private void attachClickHandler(ImageView imageView, int row, int column) {
         imageView.setOnMouseClicked((MouseEvent event) -> {
             Block block = board.get(row, column);
             if (event.getButton() == MouseButton.PRIMARY) {
@@ -159,7 +168,7 @@ public class Gui {
         });
     }
 
-    private Node createMenuNode(Stage primaryStage, Board board) {
+    private Node createMenuNode(Stage primaryStage) {
         Button newBtn = new Button("New");
         newBtn.setOnAction((ActionEvent e) -> reset(primaryStage));
 
