@@ -21,6 +21,7 @@ public class DoubleTurn extends TransitiveBlock {
             switch(fromDirection) {
                 case LEFT: case UP:
                     power.setLeft(colour);
+                    break;
                 default:
                     power.setRight(colour);
             }
@@ -28,6 +29,7 @@ public class DoubleTurn extends TransitiveBlock {
             switch(fromDirection) {
                 case LEFT: case DOWN:
                     power.setLeft(colour);
+                    break;
                 default:
                     power.setRight(colour);
             }

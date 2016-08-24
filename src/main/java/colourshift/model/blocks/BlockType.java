@@ -38,12 +38,12 @@ public enum BlockType {
                     ThreeAngle.NOT_DOWN, new DirectionsDivision(new DirectionSet(Direction.LEFT, Direction.UP, Direction.RIGHT)))),
     DOUBLE_TURN(DoubleTurn.class, 2, DoubleTurnAngle.values(),
             ImmutableBiMap.of(
-                    DoubleTurnAngle.LEFT_UP_AND_RIGHT_DOWN, new DirectionsDivision(
-                            new DirectionSet(Direction.LEFT, Direction.UP),
-                            new DirectionSet(Direction.RIGHT, Direction.DOWN)),
                     DoubleTurnAngle.LEFT_DOWN_AND_UP_RIGHT, new DirectionsDivision(
                             new DirectionSet(Direction.LEFT, Direction.DOWN),
-                            new DirectionSet(Direction.UP, Direction.RIGHT)))),
+                            new DirectionSet(Direction.UP, Direction.RIGHT)),
+                    DoubleTurnAngle.LEFT_UP_AND_RIGHT_DOWN, new DirectionsDivision(
+                            new DirectionSet(Direction.LEFT, Direction.UP),
+                            new DirectionSet(Direction.RIGHT, Direction.DOWN)))),
     HALF_FOUR(HalfFour.class, 2, Single.values(),
             ImmutableBiMap.of(
                     Single.SINGLE, new DirectionsDivision(

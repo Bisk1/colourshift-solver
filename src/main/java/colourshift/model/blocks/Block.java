@@ -96,12 +96,6 @@ public abstract class Block implements Serializable {
 		angle = angleToFix;
 	}
 
-	public void revertAngles(Set<Angle> feasibleAngles, Angle angle) {
-		this.feasibleAngles = feasibleAngles;
-		this.angle = angle;
-	}
-
-
 	public Angle getAngle() {
 		return angle;
 	}
