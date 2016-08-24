@@ -18,7 +18,7 @@ public enum Colour {
     YELLOW(ImmutableSet.of(Component.RED, Component.GREEN), new Color(255, 255, 0)),
     MAGENTA(ImmutableSet.of(Component.RED, Component.BLUE), new Color(255, 0, 255)),
     CYAN(ImmutableSet.of(Component.GREEN, Component.BLUE), new Color(0, 255, 255)),
-    WHITE(ImmutableSet.of(Component.GREEN, Component.GREEN, Component.BLUE), new Color(255, 255, 255));
+    WHITE(ImmutableSet.of(Component.RED, Component.GREEN, Component.BLUE), new Color(255, 255, 255));
 
     private static class Holder {
         static Map<Colour, Set<Component>> coloursToComponents = Maps.newHashMap();
