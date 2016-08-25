@@ -132,8 +132,16 @@ public class TransitiveBlockSolver extends BlockSolver {
             if (!mustSendDirections.isEmpty()
                     && mustSendColours.size() == 1
                     && canReceiveDirections.size() == 1) {
-                updatesCandidates.put(canReceiveDirections.iterator().next(),
-                        BorderRequirement.mustSend(mustSendColours.iterator().next()));
+                Direction receiver = canReceiveDirections.iterator().next();
+                Colour colourToReceive = mustSendColours.iterator().next();
+                updatesCandidates.put(receiver, BorderRequirement.mustSend(colourToReceive));
+                // Now all the directions except for receiver, can send
+                directionSet.stream()
+                        .filter(direction -> direction != receiver) // the one that receives
+                        .filter(direction -> !mustSendDirections.contains(direction)) // those that already must send
+                        .forEach(direction -> updatesCandidates.put(
+                                direction, BorderRequirement.canReceive(colourToReceive)));
+
             }
         }
 

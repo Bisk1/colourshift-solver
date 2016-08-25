@@ -206,8 +206,7 @@ public class PropagationTest {
                         Direction.UP, BorderRequirement.canReceive(Colour.GREEN),
                         Direction.RIGHT, BorderRequirement.mustSend(Colour.GREEN),
                         Direction.DOWN, BorderRequirement.indifferent()
-                ),
-                Sets.newHashSet(Direction.LEFT));
+                ));
 
         block.getSolver().bordersUpdated();
 
