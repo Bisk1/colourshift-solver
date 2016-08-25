@@ -61,4 +61,8 @@ public class BorderView implements Serializable {
 	public boolean provided(Colour colour) {
 		return border.providedTo(block, colour);
 	}
+
+	public boolean isAuthor() {
+		return border.getBorderStatusAuthor() == block;
+	}
 }

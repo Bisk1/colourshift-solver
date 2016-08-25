@@ -18,5 +18,5 @@ public class App extends Application {
         ApplicationContext ctx = new AnnotationConfigApplicationContext(AppConfig.class);
         Gui gui = ctx.getBean(Gui.class);
         gui.init(primaryStage);
-	}
+}
 }

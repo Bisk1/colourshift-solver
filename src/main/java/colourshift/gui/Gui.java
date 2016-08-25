@@ -4,7 +4,11 @@ import colourshift.model.Board;
 import colourshift.model.BoardFactory;
 import colourshift.model.BoardFactory.Wrap;
 import colourshift.model.Colour;
+import colourshift.model.Direction;
 import colourshift.model.blocks.*;
+import colourshift.model.border.BorderRequirement;
+import colourshift.model.border.BorderStatus;
+import colourshift.model.border.BorderView;
 import colourshift.solver.BoardSolver;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
@@ -21,10 +25,9 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
@@ -32,6 +35,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.*;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Optional;
 
 @Component
@@ -59,7 +64,7 @@ public class Gui {
     /**
      * Collection of images for all board blocks
      */
-    private Table<Integer, Integer, ImageView> blocksImageViewsTable;
+    private Table<Integer, Integer, StackPane> blocksPanesTable;
 
     public void init(Stage primaryStage) throws Exception {
         primaryStage.setTitle("Colourshift solver");
@@ -126,16 +131,19 @@ public class Gui {
 
     private Node createBoardNode(Board board) {
         this.board = board;
-        blocksImageViewsTable = HashBasedTable.create();
+        blocksPanesTable = HashBasedTable.create();
         GridPane boardScene = new GridPane();
         for (int row = 0; row < board.size(); row++) {
             for (int column = 0; column < board.size(); column++) {
                 Block block = board.get(row, column);
                 Image image = imageProvider.getBlockImage(block);
                 ImageView imageView = new ImageView(image);
-                boardScene.add(imageView, column, row);
-                attachClickHandler(imageView, row, column);
-                blocksImageViewsTable.put(row, column, imageView);
+
+                StackPane imagePane = new StackPane(imageView);
+                imagePane.setAlignment(Pos.CENTER);
+                boardScene.add(imagePane, column, row);
+                attachClickHandler(imagePane, row, column);
+                blocksPanesTable.put(row, column, imagePane);
             }
         }
         return boardScene;
@@ -151,13 +159,48 @@ public class Gui {
             for (int column = 0; column < board.size(); column++) {
                 Block block = board.get(row, column);
                 Image newImage = imageProvider.getBlockImage(block);
-                blocksImageViewsTable.get(row, column).setImage(newImage);
+                Pane imageStackPane = blocksPanesTable.get(row, column);
+                imageStackPane.getChildren().clear();
+                imageStackPane.getChildren().add(new ImageView(newImage));
+                // Uncomment to debug
+//                Text text = new Text(blockSolverSummary(block));
+//                text.setFill(Color.RED);
+//                text.setFont(Font.font("Verdana", 20));
+//                imageStackPane.getChildren().add(text);
             }
         }
     }
 
-    private void attachClickHandler(ImageView imageView, int row, int column) {
-        imageView.setOnMouseClicked((MouseEvent event) -> {
+    private String blockSolverSummary(Block block) {
+        StringBuilder result = new StringBuilder();
+        for (Direction direction : Direction.values()) {
+            result.append(direction.toString().charAt(0) + ": ");
+            Optional<BorderView> borderView = block.getBorderMap().getBorderView(direction);
+            if (borderView.isPresent())  {
+                BorderStatus borderStatus = borderView.get().getBorderRequirement().getBorderStatus();
+                switch (borderStatus) {
+                    case UNKNOWN: result.append("U");
+                        break;
+                    case INDIFFERENT: result.append("I");
+                        break;
+                    case MUST_SEND: result.append("M");
+                        break;
+                    case CAN_RECEIVE: result.append("R");
+                        break;
+                    case CANNOT_SEND: result.append("N");
+                        break;
+                }
+                if (borderView.get().isAuthor()) {
+                    result.append("!");
+                }
+                result.append(",");
+            }
+        }
+        return result.toString();
+    }
+
+    private void attachClickHandler(Pane imagePane, int row, int column) {
+        imagePane.setOnMouseClicked((MouseEvent event) -> {
             Block block = board.get(row, column);
             if (event.getButton() == MouseButton.PRIMARY) {
                 board.rotate(block);

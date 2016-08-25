@@ -2,6 +2,7 @@ import colourshift.model.Colour;
 import colourshift.model.Direction;
 import colourshift.model.angle.Orientation;
 import colourshift.model.angle.Single;
+import colourshift.model.angle.ThreeAngle;
 import colourshift.model.angle.TurnAngle;
 import colourshift.model.blocks.*;
 import colourshift.model.border.BorderMap;
@@ -193,6 +194,25 @@ public class PropagationTest {
         turn.getSolver().bordersUpdated();
 
         Assert.assertEquals(Sets.newHashSet(TurnAngle.LEFT_DOWN), turn.getFeasibleAngles());
+    }
+
+    @Test
+    public void canReceivePropagates() {
+        Block block = new Three();
+
+        mockBorderMap(block,
+                ImmutableMap.of(
+                        Direction.LEFT, BorderRequirement.cannotSend(),
+                        Direction.UP, BorderRequirement.canReceive(Colour.GREEN),
+                        Direction.RIGHT, BorderRequirement.mustSend(Colour.GREEN),
+                        Direction.DOWN, BorderRequirement.indifferent()
+                ),
+                Sets.newHashSet(Direction.LEFT));
+
+        block.getSolver().bordersUpdated();
+
+        Assert.assertEquals(BorderStatus.CAN_RECEIVE, block.getBorderMap().getBorderView(Direction.LEFT).get().getBorderRequirement().getBorderStatus());
+        Assert.assertEquals(Sets.newHashSet(ThreeAngle.NOT_DOWN), block.getFeasibleAngles());
     }
 
 

@@ -30,7 +30,7 @@ public class BoardSolver {
         applyInitialRules();
         board.refreshPower();
         if (!board.isSolved()) {
-            branchAndBound(board);
+            //branchAndBound(board);
         }
     }
 
