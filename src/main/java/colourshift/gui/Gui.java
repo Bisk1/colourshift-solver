@@ -6,7 +6,6 @@ import colourshift.model.BoardFactory.Wrap;
 import colourshift.model.Colour;
 import colourshift.model.Direction;
 import colourshift.model.blocks.*;
-import colourshift.model.border.BorderRequirement;
 import colourshift.model.border.BorderStatus;
 import colourshift.model.border.BorderView;
 import colourshift.solver.BoardSolver;
@@ -35,13 +34,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Optional;
 
 @Component
 public class Gui {
-    private static boolean DEBUG = true;
+    private static boolean DEBUG = false;
 
     @Autowired
     private BoardFactory boardFactory;
@@ -190,7 +187,7 @@ public class Gui {
                         result.append("M");
                         result.append(borderView.get().getBorderRequirement().getColour().get().toString().charAt(0));
                         break;
-                    case CAN_RECEIVE:
+                    case PROVIDED:
                         result.append("R");
                         result.append(borderView.get().getBorderRequirement().getColour().get().toString().charAt(0));
                         break;

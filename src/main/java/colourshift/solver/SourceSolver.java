@@ -5,7 +5,6 @@ import colourshift.model.DirectionSet;
 import colourshift.model.angle.Angle;
 import colourshift.model.blocks.Source;
 import colourshift.model.border.BorderRequirement;
-import colourshift.model.border.BorderStatus;
 import com.google.common.collect.Sets;
 
 import java.util.Set;
@@ -37,7 +36,7 @@ public class SourceSolver extends BlockSolver {
                     .collect(Collectors.toSet());
         }
         for (Direction direction : colourProvidedCandidates) {
-            block.getBorderMap().getBorderView(direction).get().updateBorderStatus(BorderRequirement.canReceive(block.getPower().getColour()));
+            block.getBorderMap().getBorderView(direction).get().updateBorderStatus(BorderRequirement.provided(block.getPower().getColour()));
         }
     }
 

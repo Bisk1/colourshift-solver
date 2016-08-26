@@ -30,8 +30,8 @@ public class BorderRequirement implements Serializable {
         return new BorderRequirement(BorderStatus.MUST_SEND, colour);
     }
 
-    public static BorderRequirement canReceive(Colour colour) {
-        return new BorderRequirement(BorderStatus.CAN_RECEIVE, colour);
+    public static BorderRequirement provided(Colour colour) {
+        return new BorderRequirement(BorderStatus.PROVIDED, colour);
     }
 
     public BorderStatus getBorderStatus() {

@@ -1,9 +1,6 @@
 import colourshift.model.Colour;
 import colourshift.model.Direction;
-import colourshift.model.angle.Orientation;
-import colourshift.model.angle.Single;
-import colourshift.model.angle.ThreeAngle;
-import colourshift.model.angle.TurnAngle;
+import colourshift.model.angle.*;
 import colourshift.model.blocks.*;
 import colourshift.model.border.BorderMap;
 import colourshift.model.border.BorderRequirement;
@@ -203,14 +200,14 @@ public class PropagationTest {
         mockBorderMap(block,
                 ImmutableMap.of(
                         Direction.LEFT, BorderRequirement.cannotSend(),
-                        Direction.UP, BorderRequirement.canReceive(Colour.GREEN),
+                        Direction.UP, BorderRequirement.provided(Colour.GREEN),
                         Direction.RIGHT, BorderRequirement.mustSend(Colour.GREEN),
                         Direction.DOWN, BorderRequirement.indifferent()
                 ));
 
         block.getSolver().bordersUpdated();
 
-        Assert.assertEquals(BorderStatus.CAN_RECEIVE, block.getBorderMap().getBorderView(Direction.LEFT).get().getBorderRequirement().getBorderStatus());
+        Assert.assertEquals(BorderStatus.PROVIDED, block.getBorderMap().getBorderView(Direction.LEFT).get().getBorderRequirement().getBorderStatus());
         Assert.assertEquals(Sets.newHashSet(ThreeAngle.NOT_DOWN), block.getFeasibleAngles());
     }
 
@@ -222,13 +219,13 @@ public class PropagationTest {
                 ImmutableMap.of(
                         Direction.LEFT, BorderRequirement.cannotSend(),
                         Direction.UP, BorderRequirement.indifferent(),
-                        Direction.RIGHT, BorderRequirement.canReceive(Colour.GREEN),
+                        Direction.RIGHT, BorderRequirement.provided(Colour.GREEN),
                         Direction.DOWN, BorderRequirement.indifferent()
                 ));
 
         block.getSolver().bordersUpdated();
 
-        Assert.assertEquals(BorderStatus.CAN_RECEIVE, block.getBorderMap().getBorderView(Direction.LEFT).get().getBorderRequirement().getBorderStatus());
+        Assert.assertEquals(BorderStatus.PROVIDED, block.getBorderMap().getBorderView(Direction.LEFT).get().getBorderRequirement().getBorderStatus());
         Assert.assertEquals(Sets.newHashSet(Orientation.HORIZONTAL), block.getFeasibleAngles());
     }
 
@@ -247,7 +244,24 @@ public class PropagationTest {
         block.getSolver().bordersUpdated();
 
         Assert.assertEquals(Sets.newHashSet(Orientation.VERTICAL), block.getFeasibleAngles());
-        Assert.assertEquals(BorderStatus.CAN_RECEIVE, block.getBorderMap().getBorderView(Direction.UP).get().getBorderRequirement().getBorderStatus());
+        Assert.assertEquals(BorderStatus.PROVIDED, block.getBorderMap().getBorderView(Direction.UP).get().getBorderRequirement().getBorderStatus());
+    }
+
+    @Test
+    public void forbidAngleIfSendsForbiddenColourToMandatoryBorder() {
+        Block block = new DoubleTurn();
+
+        mockBorderMap(block,
+                ImmutableMap.of(
+                        Direction.LEFT, BorderRequirement.unknown(),
+                        Direction.UP, BorderRequirement.unknown(),
+                        Direction.RIGHT, BorderRequirement.mustSend(Colour.BLUE),
+                        Direction.DOWN, BorderRequirement.provided(Colour.GREEN))
+        );
+
+        block.getSolver().bordersUpdated();
+
+        Assert.assertEquals(Sets.newHashSet(DoubleTurnAngle.LEFT_DOWN_AND_UP_RIGHT), block.getFeasibleAngles());
     }
 
 }

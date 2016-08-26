@@ -9,7 +9,6 @@ import colourshift.model.blocks.TransitiveBlock;
 import colourshift.model.border.BorderRequirement;
 import colourshift.model.border.BorderStatus;
 import colourshift.model.border.BorderView;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
@@ -28,17 +27,18 @@ public class TransitiveBlockSolver extends BlockSolver {
     @Override
     protected void reduceAngles() {
         super.reduceAngles();
-        reduceAnglesWithMustSendBordersButWithoutBorderThatCanReceive();
-
+        reduceAngleThatCannotSatisfyMustSendRequirement();
     }
 
 
-    private void reduceAnglesWithMustSendBordersButWithoutBorderThatCanReceive() {
+    private void reduceAngleThatCannotSatisfyMustSendRequirement() {
         Set<Angle> feasibleAngles = Sets.newHashSet(block.getFeasibleAngles()); // the original collection will be modified
         for (Angle angle: feasibleAngles) {
             DirectionsDivision directionsDivision = block.getDirectionsDivisions().get(angle);
             for (DirectionSet directionSet : directionsDivision) {
                 Set<Direction> canReceiveDirections = Sets.newHashSet();
+                Set<Direction> providedDirections = Sets.newHashSet();
+                Set<Colour> providedColours = Sets.newHashSet();
                 Set<Direction> mustSendDirections = Sets.newHashSet();
                 Set<Colour> mustSendColours = Sets.newHashSet();
                 for (Direction direction : directionSet) {
@@ -47,6 +47,11 @@ public class TransitiveBlockSolver extends BlockSolver {
                         if (borderView.canReceive()) {
                             canReceiveDirections.add(direction);
                         }
+                        Optional<Colour> providedColour = borderView.provided();
+                        if (providedColour.isPresent()) {
+                            providedDirections.add(direction);
+                            providedColours.add(providedColour.get());
+                        }
                         Optional<Colour> mustSendColour = borderView.mustSend();
                         if (mustSendColour.isPresent()) {
                             mustSendDirections.add(direction);
@@ -54,8 +59,28 @@ public class TransitiveBlockSolver extends BlockSolver {
                         }
                     }
                 }
-                if (!mustSendDirections.isEmpty() && canReceiveDirections.isEmpty()) {
-                    block.forbidAngle(angle);
+                if (!mustSendDirections.isEmpty()) {
+                    if (mustSendColours.size() > 1) {
+                        block.forbidAngle(angle);
+                    } else if (canReceiveDirections.isEmpty()) {
+                        block.forbidAngle(angle);
+                    } else if (!providedColours.isEmpty()) {
+                        Colour mustSendColour = mustSendColours.iterator().next();
+                        providedColours.forEach(providedColour -> {
+                            if (!providedColour.isSubcolour(mustSendColour)) {
+                                block.forbidAngle(angle);
+                            }
+                        });
+
+                        if (providedDirections.equals(canReceiveDirections)) {
+                            // this means that no other colours will be provided,
+                            // should already have the msut send colour
+                            Colour providedColour = Colour.mix(providedColours);
+                            if (providedColour != mustSendColour) {
+                                block.forbidAngle(angle);
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -122,8 +147,7 @@ public class TransitiveBlockSolver extends BlockSolver {
             Optional<Colour> colour = block.getBorderMap().getColourMix(directionSet);
             if (colour.isPresent()) {
                 for (Direction direction : directionSet) {
-                    System.out.println("can receive 1: " + colour.get());
-                    updatesCandidates.put(direction, BorderRequirement.canReceive(colour.get()));
+                    updatesCandidates.put(direction, BorderRequirement.provided(colour.get()));
                 }
             }
 
@@ -141,7 +165,7 @@ public class TransitiveBlockSolver extends BlockSolver {
                         .filter(direction -> direction != receiver) // the one that receives
                         .filter(direction -> !mustSendDirections.contains(direction)) // those that already must send
                         .forEach(direction -> updatesCandidates.put(
-                                direction, BorderRequirement.canReceive(colourToReceive)));
+                                direction, BorderRequirement.provided(colourToReceive)));
             }
         }
 
@@ -171,14 +195,14 @@ public class TransitiveBlockSolver extends BlockSolver {
             }
         }
         if (updatesCandidates.stream()
-                .allMatch(borderRequirement -> borderRequirement.getBorderStatus() == BorderStatus.CAN_RECEIVE)) {
+                .allMatch(borderRequirement -> borderRequirement.getBorderStatus() == BorderStatus.PROVIDED)) {
             Colour colourCandidate = updatesCandidates.iterator().next().getColour().get();
             if (colourCandidate == Colour.GREY) {
                 System.out.println("here");
             }
             if (updatesCandidates.stream()
                     .allMatch(borderRequirement -> borderRequirement.getColour().get() == colourCandidate)) {
-                return Optional.of(BorderRequirement.canReceive(colourCandidate));
+                return Optional.of(BorderRequirement.provided(colourCandidate));
             }
         }
         if (updatesCandidates.stream()

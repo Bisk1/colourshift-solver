@@ -3,11 +3,9 @@ package colourshift.model.border;
 import colourshift.model.Colour;
 import colourshift.model.Direction;
 import colourshift.model.blocks.Block;
-import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
 import java.io.Serializable;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -123,10 +121,13 @@ public class Border implements Serializable {
     }
 
 
-    public boolean providedTo(Block block, Colour colour) {
-        return borderRequirement.getBorderStatus() == BorderStatus.CAN_RECEIVE
-                && borderRequirement.getColour().get() == colour
-                && borderStatusAuthor != block;
+    public Optional<Colour> providedTo(Block block) {
+        if (borderRequirement.getBorderStatus() == BorderStatus.PROVIDED
+                && borderStatusAuthor != block) {
+            return borderRequirement.getColour();
+        } else {
+            return Optional.empty();
+        }
     }
 
     public BorderRequirement getBorderRequirement() {

@@ -1,5 +1,6 @@
 package colourshift.solver;
 
+import colourshift.model.Colour;
 import colourshift.model.Direction;
 import colourshift.model.angle.Angle;
 import colourshift.model.blocks.Block;
@@ -48,7 +49,8 @@ public class TargetSolver extends BlockSolver {
             Direction direction = (Direction) angle;
             Optional<BorderView> borderView = block.getBorderMap().getBorderView(direction);
             if (borderView.isPresent()) {
-                if (borderView.get().provided(block.getPower().getRequired())) {
+                Optional<Colour> providedColour = borderView.get().provided();
+                if (providedColour.isPresent() && providedColour.get() == block.getPower().getRequired()) {
                     block.fixAngle(direction);
                 }
             }
