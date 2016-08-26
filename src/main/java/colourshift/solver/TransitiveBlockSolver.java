@@ -122,6 +122,7 @@ public class TransitiveBlockSolver extends BlockSolver {
             Optional<Colour> colour = block.getBorderMap().getColourMix(directionSet);
             if (colour.isPresent()) {
                 for (Direction direction : directionSet) {
+                    System.out.println("can receive 1: " + colour.get());
                     updatesCandidates.put(direction, BorderRequirement.canReceive(colour.get()));
                 }
             }
@@ -141,7 +142,6 @@ public class TransitiveBlockSolver extends BlockSolver {
                         .filter(direction -> !mustSendDirections.contains(direction)) // those that already must send
                         .forEach(direction -> updatesCandidates.put(
                                 direction, BorderRequirement.canReceive(colourToReceive)));
-
             }
         }
 
@@ -173,6 +173,9 @@ public class TransitiveBlockSolver extends BlockSolver {
         if (updatesCandidates.stream()
                 .allMatch(borderRequirement -> borderRequirement.getBorderStatus() == BorderStatus.CAN_RECEIVE)) {
             Colour colourCandidate = updatesCandidates.iterator().next().getColour().get();
+            if (colourCandidate == Colour.GREY) {
+                System.out.println("here");
+            }
             if (updatesCandidates.stream()
                     .allMatch(borderRequirement -> borderRequirement.getColour().get() == colourCandidate)) {
                 return Optional.of(BorderRequirement.canReceive(colourCandidate));

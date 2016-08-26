@@ -28,6 +28,8 @@ public class BlockSolver implements Serializable {
             return new TargetSolver((Target) block);
         } else if (block instanceof TransitiveBlock) {
             return new TransitiveBlockSolver((TransitiveBlock) block);
+        } else if (block instanceof Source) {
+            return new SourceSolver((Source) block);
         } else {
             return new BlockSolver(block);
         }

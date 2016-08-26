@@ -18,7 +18,7 @@ import java.util.Set;
 
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
 
 public class PropagationTest {
 
@@ -197,7 +197,7 @@ public class PropagationTest {
     }
 
     @Test
-    public void canReceivePropagates() {
+    public void setCanReceiveWhenDirectionSetHasMandatoryReceiver() {
         Block block = new Three();
 
         mockBorderMap(block,
@@ -214,5 +214,40 @@ public class PropagationTest {
         Assert.assertEquals(Sets.newHashSet(ThreeAngle.NOT_DOWN), block.getFeasibleAngles());
     }
 
+    @Test
+    public void setCanReceiveWhenDirectionSetHasNonMandatoryReceiver() {
+        Block block = new Straight();
+
+        mockBorderMap(block,
+                ImmutableMap.of(
+                        Direction.LEFT, BorderRequirement.cannotSend(),
+                        Direction.UP, BorderRequirement.indifferent(),
+                        Direction.RIGHT, BorderRequirement.canReceive(Colour.GREEN),
+                        Direction.DOWN, BorderRequirement.indifferent()
+                ));
+
+        block.getSolver().bordersUpdated();
+
+        Assert.assertEquals(BorderStatus.CAN_RECEIVE, block.getBorderMap().getBorderView(Direction.LEFT).get().getBorderRequirement().getBorderStatus());
+        Assert.assertEquals(Sets.newHashSet(Orientation.HORIZONTAL), block.getFeasibleAngles());
+    }
+
+    @Test
+    public void fixedSourceShouldSetProvidedWherePossible() {
+        Block block = new SourceStraight(Colour.GREEN);
+
+        mockBorderMap(block,
+                ImmutableMap.of(
+                        Direction.LEFT, BorderRequirement.unknown(),
+                        Direction.UP, BorderRequirement.unknown(),
+                        Direction.RIGHT, BorderRequirement.unknown(),
+                        Direction.DOWN, BorderRequirement.mustSend(Colour.GREEN))
+        );
+
+        block.getSolver().bordersUpdated();
+
+        Assert.assertEquals(Sets.newHashSet(Orientation.VERTICAL), block.getFeasibleAngles());
+        Assert.assertEquals(BorderStatus.CAN_RECEIVE, block.getBorderMap().getBorderView(Direction.UP).get().getBorderRequirement().getBorderStatus());
+    }
 
 }

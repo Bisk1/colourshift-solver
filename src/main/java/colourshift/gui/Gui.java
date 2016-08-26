@@ -41,6 +41,7 @@ import java.util.Optional;
 
 @Component
 public class Gui {
+    private static boolean DEBUG = true;
 
     @Autowired
     private BoardFactory boardFactory;
@@ -162,11 +163,12 @@ public class Gui {
                 Pane imageStackPane = blocksPanesTable.get(row, column);
                 imageStackPane.getChildren().clear();
                 imageStackPane.getChildren().add(new ImageView(newImage));
-                // Uncomment to debug
-//                Text text = new Text(blockSolverSummary(block));
-//                text.setFill(Color.RED);
-//                text.setFont(Font.font("Verdana", 20));
-//                imageStackPane.getChildren().add(text);
+                if (DEBUG) {
+                    Text text = new Text(blockSolverSummary(block));
+                    text.setFill(Color.RED);
+                    text.setFont(Font.font("Verdana", 20));
+                    imageStackPane.getChildren().add(text);
+                }
             }
         }
     }
@@ -174,7 +176,8 @@ public class Gui {
     private String blockSolverSummary(Block block) {
         StringBuilder result = new StringBuilder();
         for (Direction direction : Direction.values()) {
-            result.append(direction.toString().charAt(0) + ": ");
+            result.append(direction.toString().charAt(0));
+            result.append(": ");
             Optional<BorderView> borderView = block.getBorderMap().getBorderView(direction);
             if (borderView.isPresent())  {
                 BorderStatus borderStatus = borderView.get().getBorderRequirement().getBorderStatus();
@@ -183,9 +186,13 @@ public class Gui {
                         break;
                     case INDIFFERENT: result.append("I");
                         break;
-                    case MUST_SEND: result.append("M");
+                    case MUST_SEND:
+                        result.append("M");
+                        result.append(borderView.get().getBorderRequirement().getColour().get().toString().charAt(0));
                         break;
-                    case CAN_RECEIVE: result.append("R");
+                    case CAN_RECEIVE:
+                        result.append("R");
+                        result.append(borderView.get().getBorderRequirement().getColour().get().toString().charAt(0));
                         break;
                     case CANNOT_SEND: result.append("N");
                         break;
