@@ -23,12 +23,13 @@ public abstract class Block implements Serializable {
 	 */
 	protected Angle angle;
 	/**
-	 * Represents 4 borders (except for the blocks on the board border) of the block.
-	 * All communication intended to reach neighbouring blocks is handled by this map.
+	 * Represents 4 borders (except for the blocks on the board edge) of the block.
+	 * All interaction with neighbour blocks is handled by this object.
 	 */
 	protected BorderMap borderMap;
 	/**
-	 * All angles that are feasible for specific block type. This list defines also order of rotating.
+	 * All angles that are feasible for specific block type. The order of
+	 * the angles in this list also defines order of rotating on user click.
 	 */
 	private List<? extends Angle> initialAngles;
 	/**
@@ -74,6 +75,8 @@ public abstract class Block implements Serializable {
      * Remove the angle from the set of feasible angles
      * and update the current angle so that it is within the
      * feasible angles set.
+     * If the angle is not in feasible set, nothing happens.
+     * If the angle is the last one in feasible set, UnsolvableException is thrown.
      *
      * @param angleToForbid angle to forbid
      */
@@ -89,7 +92,8 @@ public abstract class Block implements Serializable {
 
 	/**
 	 * Make the specified angle the only feasible one. Also set it as current.
-	 * @param angleToFix
+     *
+	 * @param angleToFix angle to fix
      */
 	public void fixAngle(Angle angleToFix) {
 		feasibleAngles = Sets.newHashSet(angleToFix);
@@ -119,7 +123,6 @@ public abstract class Block implements Serializable {
         return solver;
     }
 
-    //debugging
     private int row;
 	private int col;
     public void setPosition(int row, int col) {

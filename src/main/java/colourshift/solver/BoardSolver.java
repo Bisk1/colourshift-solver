@@ -28,6 +28,8 @@ public class BoardSolver {
 
     private void solve(Board board) {
         applyInitialRules();
+        System.out.println("After initial bound");
+        countAndLogFeasibleStates();
         board.refreshPower();
         if (!board.isSolved()) {
             branchAndBound(board);
