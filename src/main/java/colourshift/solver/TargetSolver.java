@@ -23,8 +23,8 @@ public class TargetSolver extends BlockSolver {
 
     @Override
     public void applyInitialRules() {
-        super.applyInitialRules();
         reduceAnglesForTargetNeighbours();
+        super.applyInitialRules();
     }
 
     private void reduceAnglesForTargetNeighbours() {

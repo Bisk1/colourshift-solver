@@ -52,9 +52,6 @@ public class BlockSolver implements Serializable {
     }
 
     public void bordersUpdated() {
-        for (Direction direction : block.getBorderMap().getExistingBordersDirections()) {
-            BorderView borderView = block.getBorderMap().getBorderView(direction).get();
-        }
         reduceAngles();
         propagateBorder();
     }
