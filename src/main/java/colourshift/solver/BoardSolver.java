@@ -32,13 +32,18 @@ public class BoardSolver {
         countAndLogFeasibleStates();
         board.refreshPower();
         if (!board.isSolved()) {
-            branchAndBound(board);
+            branchAndBound(board, 0, 0);
         }
     }
 
-    private void branchAndBound(Board board) {
+    private void branchAndBound(Board board, int depth, double percentage) {
+        double localPercentage = 100 / Math.pow(2, depth);
         Block blockToFix = findAnyUnfixedBlock(board);
+        int total = blockToFix.getFeasibleAngles().size();
+        double unitSize = localPercentage / total;
         for (Angle angleToFix : blockToFix.getFeasibleAngles()) {
+            percentage += unitSize;
+            System.out.printf("%f %%\n", percentage);
             Board boardBranch = board.copy();
             Block blockBranch = boardBranch.get(blockToFix.getRow(), blockToFix.getCol());
             blockBranch.fixAngle(angleToFix);
@@ -48,7 +53,7 @@ public class BoardSolver {
                 if (boardBranch.isSolved()) {
                     this.board = boardBranch;
                 } else {
-                    branchAndBound(boardBranch);
+                    branchAndBound(boardBranch, depth + 1, percentage);
                 }
                 return;
             } catch (UnsolvableException e) {

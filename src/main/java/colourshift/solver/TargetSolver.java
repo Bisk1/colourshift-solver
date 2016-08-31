@@ -68,7 +68,11 @@ public class TargetSolver extends BlockSolver {
 
     private void setTheOnlyUsedBorderAsMandatory() {
         Direction mandatoryDirection = (Direction) block.getFeasibleAngles().iterator().next();
-        block.getBorderMap().getBorderView(mandatoryDirection).get().updateBorderStatus(BorderRequirement.mustSend(block.getPower().getRequired()));
+        Optional<BorderView> mandatoryBorderView = block.getBorderMap().getBorderView(mandatoryDirection);
+        if (!mandatoryBorderView.isPresent()) { // this can happen for edge block on unsolvable board
+            throw new UnsolvableException();
+        }
+        mandatoryBorderView.get().updateBorderStatus(BorderRequirement.mustSend(block.getPower().getRequired()));
     }
 
     private void setUnknownBordersToCannotSend() {
