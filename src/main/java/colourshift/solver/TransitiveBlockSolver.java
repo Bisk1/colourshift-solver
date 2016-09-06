@@ -109,10 +109,8 @@ public class TransitiveBlockSolver extends BlockSolver {
         for (Map.Entry<Direction, Set<BorderRequirement>> directionToCandidates : directionsToUpdatesCandidates.entrySet()) {
             Optional<BorderView> borderView = block.getBorderMap().getBorderView(directionToCandidates.getKey());
             if (borderView.isPresent()) {
-                Optional<BorderRequirement> update = mergeUpdates(directionToCandidates.getValue());
-                if (update.isPresent()) {
-                    borderView.get().updateBorderStatus(update.get());
-                }
+                BorderRequirement update = mergeUpdates(directionToCandidates.getValue());
+                borderView.get().updateBorderStatus(update);
             }
         }
     }
@@ -177,21 +175,21 @@ public class TransitiveBlockSolver extends BlockSolver {
         return updatesCandidates;
     }
 
-    private Optional<BorderRequirement> mergeUpdates(Set<BorderRequirement> updatesCandidates) {
+    private BorderRequirement mergeUpdates(Set<BorderRequirement> updatesCandidates) {
         if (updatesCandidates.stream()
                 .anyMatch(borderRequirement -> borderRequirement.getBorderStatus() == BorderStatus.UNKNOWN)) {
-            return Optional.empty();
+            return BorderRequirement.unknown();
         }
         if (updatesCandidates.stream()
                 .allMatch(borderRequirement -> borderRequirement.getBorderStatus() == BorderStatus.INDIFFERENT)) {
-            return Optional.of(BorderRequirement.indifferent());
+            return BorderRequirement.indifferent();
         }
         if (updatesCandidates.stream()
                 .allMatch(borderRequirement -> borderRequirement.getBorderStatus() == BorderStatus.MUST_SEND)) {
             Colour colourCandidate = updatesCandidates.iterator().next().getColour().get();
             if (updatesCandidates.stream()
                     .allMatch(borderRequirement -> borderRequirement.getColour().get() == colourCandidate)) {
-                return Optional.of(BorderRequirement.mustSend(colourCandidate));
+                return BorderRequirement.mustSend(colourCandidate);
             }
         }
         if (updatesCandidates.stream()
@@ -199,7 +197,7 @@ public class TransitiveBlockSolver extends BlockSolver {
             Colour colourCandidate = updatesCandidates.iterator().next().getColour().get();
             if (updatesCandidates.stream()
                     .allMatch(borderRequirement -> borderRequirement.getColour().get() == colourCandidate)) {
-                return Optional.of(BorderRequirement.provided(colourCandidate));
+                return BorderRequirement.provided(colourCandidate);
             }
         }
         if (updatesCandidates.stream()
@@ -215,11 +213,11 @@ public class TransitiveBlockSolver extends BlockSolver {
                     && updatesCandidates.stream()
                     .map(BorderRequirement::getColour)
                     .allMatch(colour -> colour.isPresent() && colour.get() == colourCandidate.get())) {
-                return Optional.of(BorderRequirement.mustSend(colourCandidate.get()));
+                return BorderRequirement.mustSend(colourCandidate.get());
             }
-            return Optional.of(BorderRequirement.cannotSend());
+            return BorderRequirement.cannotSend();
         }
-        return Optional.empty();
+        return BorderRequirement.unknown();
     }
 
 }
