@@ -41,7 +41,7 @@ public class BoardSolver {
         int total = blockToFix.getFeasibleAngles().size();
         double branchProgressRange = progressRange / total;
         for (Angle angleToFix : blockToFix.getFeasibleAngles()) {
-            System.out.printf("%f %%\n", progress);
+            System.out.printf("%.10f %%\n", progress);
             Board boardBranch = board.copy();
             Block blockBranch = boardBranch.get(blockToFix.getRow(), blockToFix.getCol());
             blockBranch.fixAngle(angleToFix);
