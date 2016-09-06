@@ -197,9 +197,6 @@ public class TransitiveBlockSolver extends BlockSolver {
         if (updatesCandidates.stream()
                 .allMatch(borderRequirement -> borderRequirement.getBorderStatus() == BorderStatus.PROVIDED)) {
             Colour colourCandidate = updatesCandidates.iterator().next().getColour().get();
-            if (colourCandidate == Colour.GREY) {
-                System.out.println("here");
-            }
             if (updatesCandidates.stream()
                     .allMatch(borderRequirement -> borderRequirement.getColour().get() == colourCandidate)) {
                 return Optional.of(BorderRequirement.provided(colourCandidate));
