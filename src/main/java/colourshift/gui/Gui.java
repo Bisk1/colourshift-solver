@@ -40,6 +40,8 @@ import java.util.Optional;
 public class Gui {
     private static boolean DEBUG = false;
 
+    private static double BOARD_EDGE_LENGTH_PX = 500;
+
     @Autowired
     private BoardFactory boardFactory;
 
@@ -136,6 +138,9 @@ public class Gui {
                 Block block = board.get(row, column);
                 Image image = imageProvider.getBlockImage(block);
                 ImageView imageView = new ImageView(image);
+                double blockSize = BOARD_EDGE_LENGTH_PX / board.size();
+                imageView.setFitHeight(blockSize);
+                imageView.setFitWidth(blockSize);
 
                 StackPane imagePane = new StackPane(imageView);
                 imagePane.setAlignment(Pos.CENTER);
@@ -159,7 +164,11 @@ public class Gui {
                 Image newImage = imageProvider.getBlockImage(block);
                 Pane imageStackPane = blocksPanesTable.get(row, column);
                 imageStackPane.getChildren().clear();
-                imageStackPane.getChildren().add(new ImageView(newImage));
+                ImageView imageView = new ImageView(newImage);
+                double blockSize = BOARD_EDGE_LENGTH_PX / board.size();
+                imageView.setFitHeight(blockSize);
+                imageView.setFitWidth(blockSize);
+                imageStackPane.getChildren().add(imageView);
                 if (DEBUG) {
                     Text text = new Text(blockSolverSummary(block));
                     text.setFill(Color.RED);
