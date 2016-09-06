@@ -32,18 +32,16 @@ public class BoardSolver {
         countAndLogFeasibleStates();
         board.refreshPower();
         if (!board.isSolved()) {
-            branchAndBound(board, 0, 0);
+            branchAndBound(board, 0, 100);
         }
     }
 
-    private void branchAndBound(Board board, int depth, double percentage) {
-        double localPercentage = 100 / Math.pow(2, depth);
+    private void branchAndBound(Board board, double progress, double progressRange) {
         Block blockToFix = findAnyUnfixedBlock(board);
         int total = blockToFix.getFeasibleAngles().size();
-        double unitSize = localPercentage / total;
+        double branchProgressRange = progressRange / total;
         for (Angle angleToFix : blockToFix.getFeasibleAngles()) {
-            percentage += unitSize;
-            System.out.printf("%f %%\n", percentage);
+            System.out.printf("%f %%\n", progress);
             Board boardBranch = board.copy();
             Block blockBranch = boardBranch.get(blockToFix.getRow(), blockToFix.getCol());
             blockBranch.fixAngle(angleToFix);
@@ -53,11 +51,12 @@ public class BoardSolver {
                 if (boardBranch.isSolved()) {
                     this.board = boardBranch;
                 } else {
-                    branchAndBound(boardBranch, depth + 1, percentage);
+                    branchAndBound(boardBranch, progress, branchProgressRange);
                 }
                 return;
             } catch (UnsolvableException e) {
                 // Unacceptable angle, try another
+                progress += branchProgressRange;
             }
         }
         throw new UnsolvableException();
