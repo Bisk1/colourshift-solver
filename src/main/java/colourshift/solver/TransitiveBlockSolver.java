@@ -13,6 +13,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class TransitiveBlockSolver extends BlockSolver {
     private static long serialVersionUID = 0L;
@@ -176,44 +177,44 @@ public class TransitiveBlockSolver extends BlockSolver {
     }
 
     private BorderRequirement mergeUpdates(Set<BorderRequirement> updatesCandidates) {
-        if (updatesCandidates.stream()
-                .anyMatch(borderRequirement -> borderRequirement.getBorderStatus() == BorderStatus.UNKNOWN)) {
+        Set<BorderStatus> borderStatuses = updatesCandidates.stream()
+                .map(BorderRequirement::getBorderStatus)
+                .collect(Collectors.toSet());
+
+        if (borderStatuses.contains(BorderStatus.UNKNOWN)) {
             return BorderRequirement.unknown();
         }
-        if (updatesCandidates.stream()
-                .allMatch(borderRequirement -> borderRequirement.getBorderStatus() == BorderStatus.INDIFFERENT)) {
-            return BorderRequirement.indifferent();
-        }
-        if (updatesCandidates.stream()
-                .allMatch(borderRequirement -> borderRequirement.getBorderStatus() == BorderStatus.MUST_SEND)) {
-            Colour colourCandidate = updatesCandidates.iterator().next().getColour().get();
-            if (updatesCandidates.stream()
-                    .allMatch(borderRequirement -> borderRequirement.getColour().get() == colourCandidate)) {
-                return BorderRequirement.mustSend(colourCandidate);
+        if (borderStatuses.size() == 1) {
+            BorderStatus borderStatus = borderStatuses.iterator().next();
+
+            if (borderStatus == BorderStatus.INDIFFERENT) {
+                return BorderRequirement.indifferent();
             }
-        }
-        if (updatesCandidates.stream()
-                .allMatch(borderRequirement -> borderRequirement.getBorderStatus() == BorderStatus.PROVIDED)) {
-            Colour colourCandidate = updatesCandidates.iterator().next().getColour().get();
-            if (updatesCandidates.stream()
-                    .allMatch(borderRequirement -> borderRequirement.getColour().get() == colourCandidate)) {
-                return BorderRequirement.provided(colourCandidate);
+            if (borderStatus == BorderStatus.MUST_SEND) {
+                Colour colourCandidate = updatesCandidates.iterator().next().getColour().get();
+                if (updatesCandidates.stream()
+                        .allMatch(borderRequirement -> borderRequirement.getColour().get() == colourCandidate)) {
+                    return BorderRequirement.mustSend(colourCandidate);
+                }
             }
+            if (borderStatus == BorderStatus.PROVIDED) {
+                Set<Colour> colourCandidates = updatesCandidates.stream()
+                        .map(borderRequirement -> borderRequirement.getColour().get())
+                        .collect(Collectors.toSet());
+
+                if (colourCandidates.size() == 1) {
+                    return BorderRequirement.provided(colourCandidates.iterator().next());
+                }
+            }
+
         }
-        if (updatesCandidates.stream()
-                .allMatch(borderRequirement -> borderRequirement.getBorderStatus() == BorderStatus.CANNOT_SEND
-                        || borderRequirement.getBorderStatus() == BorderStatus.INDIFFERENT
-                        || borderRequirement.getBorderStatus() == BorderStatus.MUST_SEND)) {
-            Optional<Colour> colourCandidate = updatesCandidates.stream()
+        if (Sets.newHashSet(BorderStatus.CANNOT_SEND, BorderStatus.INDIFFERENT, BorderStatus.MUST_SEND).containsAll(borderStatuses)) {
+            Set<Optional<Colour>> colourCandidates = updatesCandidates.stream()
                     .map(BorderRequirement::getColour)
-                    .filter(Optional::isPresent)
-                    .map(Optional::get)
-                    .findFirst();
-            if (colourCandidate.isPresent()
-                    && updatesCandidates.stream()
-                    .map(BorderRequirement::getColour)
-                    .allMatch(colour -> colour.isPresent() && colour.get() == colourCandidate.get())) {
-                return BorderRequirement.mustSend(colourCandidate.get());
+                    .collect(Collectors.toSet());
+
+            if (!colourCandidates.contains(Optional.<Colour>empty()) && colourCandidates.size() == 1) {
+                return BorderRequirement.mustSend(colourCandidates.iterator().next().get());
             }
             return BorderRequirement.cannotSend();
         }
