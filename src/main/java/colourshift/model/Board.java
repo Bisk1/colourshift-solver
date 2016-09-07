@@ -3,6 +3,7 @@ package colourshift.model;
 import colourshift.model.blocks.*;
 import colourshift.model.border.BorderMap;
 import com.google.common.collect.Table;
+import com.rits.cloning.Cloner;
 
 import java.io.*;
 import java.util.Optional;
@@ -80,25 +81,8 @@ public class Board implements Serializable {
      * Returns a deep copy of the board
      */
     public Board copy() {
-        Board copy = null;
-        try {
-            // Write the object out to a byte array
-            ByteArrayOutputStream bos = new ByteArrayOutputStream();
-            ObjectOutputStream out = new ObjectOutputStream(bos);
-            out.writeObject(this);
-            out.flush();
-            out.close();
-
-            // Make an input stream from the byte array and read
-            // a copy of the object back in.
-            ObjectInputStream in = new ObjectInputStream(
-                    new ByteArrayInputStream(bos.toByteArray()));
-            copy = (Board)in.readObject();
-        }
-        catch(IOException | ClassNotFoundException e) {
-            e.printStackTrace();
-        }
-        return copy;
+        Cloner cloner = new Cloner();
+        return cloner.deepClone(this);
     }
 
 
