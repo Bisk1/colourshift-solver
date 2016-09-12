@@ -1,9 +1,9 @@
 # colourshift-solver
-This is a solver for Colorshift game.
+This is a solver for Colourshift game.
 
 The game is available here: http://www.kongregate.com/games/mrsneeze/colourshift
 
-The application has GUI that can be used to provide it with a board to solve. GUI also simulates the colour flows just like the original game's GUI.
+The application has GUI that can be used to create a board to solve. GUI also simulates the colour flow just like the original game's GUI.
 
 Technologies used:
 - Java 8
